@@ -32,6 +32,7 @@ jobs:
         touch dist/Snes9xGX/snes9xgx/cheats/cheatsdir
         touch dist/Snes9xGX/snes9xgx/saves/savesdir
         cp hbc/* dist/Snes9xGX/apps/snes9xgx/
+        cp fonts/* dist/Snes9xGX/apps/snes9xgx/
         cp executables/snes9xgx-wii.dol dist/Snes9xGX/apps/snes9xgx/boot.dol
 
     - name: Upload Wii artifacts
