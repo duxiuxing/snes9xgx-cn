@@ -633,8 +633,8 @@ LoadPrefsFromMethod (char * path)
 	{
 		strcpy(prefpath, path);
 
-		// if(appPath[0] == 0)
-		//	strcpy(appPath, prefpath);
+		if(appPath[0] == 0)
+			strcpy(appPath, prefpath);
 	}
 
 	return retval;
