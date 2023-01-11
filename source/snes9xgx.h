@@ -20,7 +20,7 @@
 #include "filelist.h"
 
 #define APPNAME 			"Snes9x GX"
-#define APPVERSION 			"4.5.2"
+#define APPVERSION 			"4.5.3"
 #define APPFOLDER 			"snes9xgx"
 #define PREF_FILE_NAME		"settings.xml"
 
@@ -52,16 +52,45 @@ enum {
 enum
 {
 	CTRL_PAD,
-	CTRL_MOUSE,
 	CTRL_SCOPE,
 	CTRL_JUST,
+	CTRL_MOUSE,
+	CTRL_MOUSE_PORT2,
+	CTRL_MOUSE_BOTH_PORTS,
 	CTRL_PAD2,
 	CTRL_PAD4,
 	CTRL_LENGTH
 };
 
-const char ctrlName[6][24] =
-{ "SNES Controller", "SNES Mouse", "Super Scope", "Justifier", "SNES Controllers (2)", "SNES Controllers (4)" };
+const char ctrlName[8][24] =
+{ 
+	"SNES Controller", 
+	"Super Scope", 
+	"Justifier", 
+	"SNES Mouse (Port 1)", 
+	"SNES Mouse (Port 2)", 
+	"SNES Mouse (Both Ports)",
+	"SNES Controllers (2)", 
+	"SNES Controllers (4)"
+};
+
+enum {
+	TURBO_BUTTON_RSTICK = 0,
+	TURBO_BUTTON_A,
+	TURBO_BUTTON_B,
+	TURBO_BUTTON_X,
+	TURBO_BUTTON_Y,
+	TURBO_BUTTON_L,
+	TURBO_BUTTON_R,
+	TURBO_BUTTON_ZL,
+	TURBO_BUTTON_ZR,
+	TURBO_BUTTON_Z,
+	TURBO_BUTTON_C,
+	TURBO_BUTTON_1,
+	TURBO_BUTTON_2,
+	TURBO_BUTTON_PLUS,
+	TURBO_BUTTON_MINUS,
+};
 
 enum {
 	LANG_JAPANESE = 0,
@@ -95,6 +124,7 @@ struct SGCSettings{
 	char	ScreenshotsFolder[MAXPATHLEN]; // Path to screenshots files
 	char	CoverFolder[MAXPATHLEN]; 	// Path to cover files
 	char	ArtworkFolder[MAXPATHLEN]; 	// Path to artwork files
+	int		HideSRAMSaving;
 	int		AutoloadGame;
 
 	char	smbip[80];
@@ -108,6 +138,8 @@ struct SGCSettings{
 	int		render;		// 0 - original, 1 - filtered, 2 - unfiltered
 	int		FilterMethod; // convert to RenderFilter
 	int		Controller;
+	int		HiResolution;
+	int		SpriteLimit;
 	int		crosshair;
 	int		widescreen;	// 0 - 4:3 aspect, 1 - 16:9 aspect
 	int		xshift;	// video output shift
@@ -123,6 +155,12 @@ struct SGCSettings{
 	int		sfxOverclock;
 	
 	int		Interpolation;
+	int		MuteAudio;
+
+	int		TurboModeEnabled; // 0 - disabled, 1 - enabled
+	int		TurboModeButton;
+	int		GamepadMenuToggle;
+	int		MapABXYRightStick;
 };
 
 void ExitApp();
