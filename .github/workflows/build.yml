@@ -87,7 +87,7 @@ jobs:
     - name: Re-zip artifacts
       run: |
         cd dist/Snes9xGX
-        zip -r Snes9xGX-CN.zip ./apps ./snes9xgx
+        zip -r Snes9xGX-CN-Full.zip ./apps ./snes9xgx
         # zip -r Snes9xGX-GameCube.zip Snes9xGX-GameCube
 
     - name: Update Git Tag
