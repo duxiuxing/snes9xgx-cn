@@ -19,6 +19,7 @@
 #include "snes9xgx.h"
 #include "menu.h"
 #include "fileop.h"
+#include "video.h"
 #include "filebrowser.h"
 #include "input.h"
 #include "button_mapping.h"
@@ -150,10 +151,17 @@ preparePrefsData ()
 	createXMLSetting("widescreen", "Aspect Ratio Correction", toStr(GCSettings.widescreen));
 	createXMLSetting("crosshair", "Crosshair", toStr(GCSettings.crosshair));
 	createXMLSetting("FilterMethod", "Filter Method", toStr(GCSettings.FilterMethod));
+	createXMLSetting("HiResolution", "SNES Hi-Res Mode", toStr(GCSettings.HiResolution));
+	createXMLSetting("SpriteLimit", "Sprites per-line Limit", toStr(GCSettings.SpriteLimit));
 	createXMLSetting("xshift", "Horizontal Video Shift", toStr(GCSettings.xshift));
 	createXMLSetting("yshift", "Vertical Video Shift", toStr(GCSettings.yshift));
 	createXMLSetting("sfxOverclock", "SuperFX Overclock", toStr(GCSettings.sfxOverclock));
 	createXMLSetting("Interpolation", "Interpolation", toStr(GCSettings.Interpolation));
+	createXMLSetting("MuteAudio", "Mute", toStr(GCSettings.MuteAudio));
+	createXMLSetting("TurboModeEnabled", "Turbo Mode Enabled", toStr(GCSettings.TurboModeEnabled));
+	createXMLSetting("TurboModeButton", "Turbo Mode Button", toStr(GCSettings.TurboModeButton));
+	createXMLSetting("GamepadMenuToggle", "Gamepad Menu Toggle", toStr(GCSettings.GamepadMenuToggle));
+	createXMLSetting("MapABXYRightStick", "Map ABXY Right Stick", toStr(GCSettings.MapABXYRightStick));
 
 	createXMLSection("Menu", "Menu Settings");
 
@@ -166,6 +174,7 @@ preparePrefsData ()
 	createXMLSetting("Rumble", "Rumble", toStr(GCSettings.Rumble));
 	createXMLSetting("language", "Language", toStr(GCSettings.language));
 	createXMLSetting("PreviewImage", "Preview Image", toStr(GCSettings.PreviewImage));
+	createXMLSetting("HideSRAMSaving", "Hide SRAM Saving", toStr(GCSettings.HideSRAMSaving));
 	
 	createXMLSection("Controller", "Controller Settings");
 
@@ -335,12 +344,19 @@ decodePrefsData ()
 			loadXMLSetting(&GCSettings.widescreen, "widescreen");
 			loadXMLSetting(&GCSettings.crosshair, "crosshair");
 			loadXMLSetting(&GCSettings.FilterMethod, "FilterMethod");
+			loadXMLSetting(&GCSettings.HiResolution, "HiResolution");
+			loadXMLSetting(&GCSettings.SpriteLimit, "SpriteLimit");
 			loadXMLSetting(&GCSettings.xshift, "xshift");
 			loadXMLSetting(&GCSettings.yshift, "yshift");
+			loadXMLSetting(&GCSettings.TurboModeEnabled, "TurboModeEnabled");
+			loadXMLSetting(&GCSettings.TurboModeButton, "TurboModeButton");
+			loadXMLSetting(&GCSettings.GamepadMenuToggle, "GamepadMenuToggle");
+			loadXMLSetting(&GCSettings.MapABXYRightStick, "MapABXYRightStick");
 			
 			// Audio Settings
 			
 			loadXMLSetting(&GCSettings.Interpolation, "Interpolation");
+			loadXMLSetting(&GCSettings.MuteAudio, "MuteAudio");
 
 			// Emulation Settings
 
@@ -355,6 +371,7 @@ decodePrefsData ()
 			loadXMLSetting(&GCSettings.Rumble, "Rumble");
 			loadXMLSetting(&GCSettings.language, "language");
 			loadXMLSetting(&GCSettings.PreviewImage, "PreviewImage");
+			loadXMLSetting(&GCSettings.HideSRAMSaving, "HideSRAMSaving");
 
 			// Controller Settings
 
@@ -405,7 +422,7 @@ void FixInvalidSettings()
 		GCSettings.SFXVolume = 40;
 	if(GCSettings.language < 0 || GCSettings.language >= LANG_LENGTH)
 		GCSettings.language = LANG_ENGLISH;
-	if(GCSettings.Controller > CTRL_PAD4 || GCSettings.Controller < CTRL_MOUSE)
+	if(GCSettings.Controller > CTRL_PAD4 || GCSettings.Controller < CTRL_SCOPE)
 		GCSettings.Controller = CTRL_PAD2;
 	if(!(GCSettings.render >= 0 && GCSettings.render < 5))
 		GCSettings.render = 3;
@@ -462,6 +479,7 @@ DefaultSettings ()
 	GCSettings.SFXVolume = 40;
 	GCSettings.Rumble = 1;
 	GCSettings.PreviewImage = 0;
+	GCSettings.HideSRAMSaving = 0;
 	
 #ifdef HW_RVL
 	GCSettings.language = CONF_GetLanguage();
@@ -479,10 +497,10 @@ DefaultSettings ()
 
 	// General
 
-	Settings.MouseMaster = true;
-	Settings.SuperScopeMaster = true;
-	Settings.JustifierMaster = true;
-	Settings.MultiPlayer5Master = true;
+	Settings.MouseMaster = false;
+	Settings.SuperScopeMaster = false;
+	Settings.JustifierMaster = false;
+	Settings.MultiPlayer5Master = false;
 	Settings.DontSaveOopsSnapshot = true;
 	Settings.ApplyCheats = true;
 
@@ -500,21 +518,21 @@ DefaultSettings ()
 	Settings.SoundInputRate = 31920;
 	Settings.DynamicRateControl = true;
 	Settings.SeparateEchoBuffer = false;
-	
-	// Interpolation Method
+	GCSettings.MuteAudio = 0;
 	GCSettings.Interpolation = 0;
 	Settings.InterpolationMethod = DSP_INTERPOLATION_GAUSSIAN;
 
 	// Graphics
 	Settings.Transparency = true;
-	Settings.SupportHiRes = true;
 	Settings.MaxSpriteTilesPerLine = 34;
 	Settings.SkipFrames = AUTO_FRAMERATE;
 	Settings.TurboSkipFrames = 19;
-	Settings.DisplayFrameRate = false;
 	Settings.AutoDisplayMessages = false;
 	Settings.InitialInfoStringTimeout = 200; // # frames to display messages for
+	Settings.DisplayFrameRate = false;
 	Settings.DisplayTime = false;
+	GCSettings.HiResolution = 1; // Enabled by default
+	GCSettings.SpriteLimit = 1; // Enabled by default
 
 	// Frame timings in 50hz and 60hz cpu mode
 	Settings.FrameTimePAL = 20000;
@@ -529,6 +547,11 @@ DefaultSettings ()
 	Settings.OneClockCycle = 6;
 	Settings.OneSlowClockCycle = 8;
 	Settings.TwoClockCycles = 12;
+
+	GCSettings.TurboModeEnabled = 1; // Enabled by default
+	GCSettings.TurboModeButton = 0; // Default is Right Analog Stick (0)
+	GCSettings.GamepadMenuToggle = 0; // 0 = All options (default), 1 = C-Stick left, 2 = R+L+Start
+	GCSettings.MapABXYRightStick = 0; 
 }
 
 /****************************************************************************
@@ -654,6 +677,8 @@ bool LoadPrefs()
 	bool prefFound = false;
 	char filepath[5][MAXPATHLEN];
 	int numDevices;
+	bool sdMounted = false;
+	bool usbMounted = false;
 	
 #ifdef HW_RVL
 	numDevices = 5;
@@ -694,13 +719,15 @@ bool LoadPrefs()
 	// rename snes9x to snes9xgx
 	if(GCSettings.LoadMethod == DEVICE_SD)
 	{
-		if(ChangeInterface(DEVICE_SD, NOTSILENT) && opendir("sd:/snes9x"))
+		sdMounted = ChangeInterface(DEVICE_SD, NOTSILENT);
+		if(sdMounted && opendir("sd:/snes9x"))
 			rename("sd:/snes9x", "sd:/snes9xgx");
 	}
 	else if(GCSettings.LoadMethod == DEVICE_USB)
 	{
-		if(ChangeInterface(DEVICE_USB, NOTSILENT) && opendir("usb:/snes9x"))
-			rename("usb:/snes9x", "usb:/snes9xgx");
+		usbMounted = ChangeInterface(DEVICE_USB, NOTSILENT);
+		if(usbMounted && opendir("usb:/snes9x"))
+			rename("usb:/snes9x", "usb:/snes9xgx");	
 	}
 	else if(GCSettings.LoadMethod == DEVICE_SMB)
 	{
@@ -728,7 +755,7 @@ bool LoadPrefs()
 		sprintf(GCSettings.ArtworkFolder, "snes9xgx/artwork");
 	
 	// attempt to create directories if they don't exist
-	if(GCSettings.LoadMethod == DEVICE_SD || GCSettings.LoadMethod == DEVICE_USB) {
+	if((GCSettings.LoadMethod == DEVICE_SD && sdMounted) || (GCSettings.LoadMethod == DEVICE_USB && usbMounted) ) {
 		char dirPath[MAXPATHLEN];
 		sprintf(dirPath, "%s%s", pathPrefix[GCSettings.LoadMethod], GCSettings.ScreenshotsFolder);
 		CreateDirectory(dirPath);
@@ -740,6 +767,10 @@ bool LoadPrefs()
 		CreateDirectory(dirPath);
 	}
 
+	if(GCSettings.videomode > 0) {
+		ResetVideo_Menu();
+	}
+
 	ChangeLanguage();
 	
 #ifdef HW_RVL
@@ -747,6 +778,5 @@ bool LoadPrefs()
 	bg_music_size = bg_music_ogg_size;
 	LoadBgMusic();
 #endif
-
 	return prefFound;
 }

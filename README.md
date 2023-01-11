@@ -30,8 +30,8 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
 |Download nightly builds from continuous integration: 	| [![Build Status][Build]][Actions] 
 |-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 
-[Actions]: https://github.com/dborth/snes9xgx/actions/workflows/continuous-integration-workflow.yml
-[Build]: https://github.com/dborth/snes9xgx/actions/workflows/continuous-integration-workflow.yml/badge.svg
+[Actions]: https://github.com/dborth/snes9xgx/actions/workflows/build.yml
+[Build]: https://github.com/dborth/snes9xgx/actions/workflows/build.yml/badge.svg
 
 
 ## FEATURES
@@ -55,6 +55,19 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
 
 
 ## UPDATE HISTORY
+
+[4.5.3 - June 15, 2022]
+
+* Compiled with latest devkitPPC/libogc
+* Updated to latest Snes9x
+* Added "Enable Turbo Mode" toggle to the Video Settings menu (based on InfiniteBlueGX's code)
+* Updated translations
+* Improved forwarder support
+* Added ability to use "Original" render mode in 480p configurations (niuus)
+* Added new speeds for Super FX overclocking (niuus)
+* Added a toggle to hide/show the SRAM save button in the save menu UI (saulfabregwiivc)
+* Added Scale2x video filter and rename Scanlines filter (thanks Tanooki16!)
+* Adjusted scanline filter (Thanks Tanooki16!)
 
 [4.5.2 - March 23, 2021]
 
