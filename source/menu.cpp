@@ -147,15 +147,33 @@ static void ResetText()
 static int currentLanguage = -1;
 
 void ChangeLanguage() {
-	if(currentLanguage == GCSettings.language) {
+	if(currentLanguage == GCSettings.Language()) {
 		return;
 	}
 
-	if(GCSettings.language == LANG_JAPANESE || GCSettings.language == LANG_KOREAN || GCSettings.language == LANG_SIMP_CHINESE) {
+	bool needLoadFont = false;
+	if (LANG_SIMP_CHINESE == LANG_DEFAULT
+		|| LANG_JAPANESE == LANG_DEFAULT
+		|| LANG_KOREAN == LANG_DEFAULT) {
+		if (GCSettings.Language() == LANG_DEFAULT)
+			needLoadFont = false;
+		else
+			needLoadFont = true;
+	}
+	else {
+		if (LANG_SIMP_CHINESE == GCSettings.Language()
+			|| LANG_JAPANESE == GCSettings.Language()
+			|| LANG_KOREAN == GCSettings.Language())
+			needLoadFont = true;
+		else
+			needLoadFont = false;
+	}
+
+	if (needLoadFont) {
 #ifdef HW_RVL
 		char filepath[MAXPATHLEN];
 
-		switch(GCSettings.language) {
+		switch(GCSettings.Language()) {
 			case LANG_KOREAN:
 				sprintf(filepath, "%s/ko.ttf", appPath);
 				break;
@@ -164,6 +182,9 @@ void ChangeLanguage() {
 				break;
 			case LANG_SIMP_CHINESE:
 				sprintf(filepath, "%s/zh.ttf", appPath);
+				break;
+			default:
+				sprintf(filepath, "%s/en.ttf", appPath);
 				break;
 		}
 
@@ -175,10 +196,10 @@ void ChangeLanguage() {
 			InitFreeType((u8*)ext_font_ttf, fontSize);
 		}
 		else {
-			GCSettings.language = currentLanguage;
+			GCSettings.SetLanguage(currentLanguage);
 		}
 #else
-	GCSettings.language = currentLanguage;
+	GCSettings.SetLanguage(currentLanguage);
 	ErrorPrompt("Unsupported language!");
 #endif
 	}
@@ -194,7 +215,7 @@ void ChangeLanguage() {
 	}
 #endif
 	ResetText();
-	currentLanguage = GCSettings.language;
+	currentLanguage = GCSettings.Language();
 }
 
 /****************************************************************************
@@ -4431,7 +4452,7 @@ static int MenuSettingsMenu()
 	int i = 0;
 	bool firstRun = true;
 	OptionList options;
-	currentLanguage = GCSettings.language;
+	currentLanguage = GCSettings.Language();
 
 	sprintf(options.name[i++], "Exit Action");
 	sprintf(options.name[i++], "Wiimote Orientation");
@@ -4521,13 +4542,15 @@ static int MenuSettingsMenu()
 				GCSettings.Rumble ^= 1;
 				break;
 			case 5:
-				GCSettings.language++;
-				
-				if(GCSettings.language == LANG_TRAD_CHINESE) // skip (not supported)
-					GCSettings.language = LANG_KOREAN;
-				else if(GCSettings.language >= LANG_LENGTH)
-					GCSettings.language = LANG_JAPANESE;
-				break;
+				{
+					int value = GCSettings.Language() + 1;
+					if (value == LANG_TRAD_CHINESE) // skip (not supported)
+						value = LANG_KOREAN;
+					else if (value >= LANG_LENGTH)
+						value = LANG_JAPANESE;
+					GCSettings.SetLanguage(value);
+					break;
+				}
 			case 6:
 				GCSettings.PreviewImage++;
 				if(GCSettings.PreviewImage > 2)
@@ -4590,7 +4613,7 @@ static int MenuSettingsMenu()
 			else
 				sprintf (options.value[7], "Off");
 
-			switch(GCSettings.language)
+			switch(GCSettings.Language())
 			{
 				case LANG_JAPANESE:		sprintf(options.value[5], "Japanese"); break;
 				case LANG_ENGLISH:		sprintf(options.value[5], "English"); break;
@@ -4839,8 +4862,8 @@ MainMenu (int menu)
 
 		if(!SupportedIOS(ios))
 			ErrorPrompt("The current IOS is unsupported. Functionality and/or stability may be adversely affected.");
-		else if(!SaneIOS(ios))
-			ErrorPrompt("The current IOS has been altered (fake-signed). Functionality and/or stability may be adversely affected.");
+		// else if(!SaneIOS(ios))
+		//	ErrorPrompt("The current IOS has been altered (fake-signed). Functionality and/or stability may be adversely affected.");
 	}
 #endif
 

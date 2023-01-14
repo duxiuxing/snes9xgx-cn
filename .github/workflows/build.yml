@@ -8,7 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ["Wii", "GameCube"]
+        # image: ["Wii", "GameCube"]
+        image: ["Wii"] # only for Wii
     container: devkitpro/devkitppc:latest
  
     steps:
@@ -33,6 +34,10 @@ jobs:
         touch dist/Snes9xGX/snes9xgx/cheats/cheatsdir
         touch dist/Snes9xGX/snes9xgx/saves/savesdir
         cp hbc/* dist/Snes9xGX/apps/snes9xgx/
+        cp fonts/en.ttf dist/Snes9xGX/apps/snes9xgx/
+        cp fonts/jp.ttf dist/Snes9xGX/apps/snes9xgx/
+        cp fonts/ko.ttf dist/Snes9xGX/apps/snes9xgx/
+        # cp fonts/zh.ttf dist/Snes9xGX/apps/snes9xgx/
         cp executables/snes9xgx-wii.dol dist/Snes9xGX/apps/snes9xgx/boot.dol
 
     - name: Upload Wii artifacts
@@ -66,7 +71,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/cn-full'
 
     steps:
     - name: Checkout snes9xgx repo
@@ -81,12 +86,9 @@ jobs:
 
     - name: Re-zip artifacts
       run: |
-        cd dist
-        rm -r Snes9xGX/snes9xgx/cheats/*
-        rm -r Snes9xGX/snes9xgx/roms/*
-        rm -r Snes9xGX/snes9xgx/saves/*
-        zip -r Snes9xGX.zip Snes9xGX
-        zip -r Snes9xGX-GameCube.zip Snes9xGX-GameCube
+        cd dist/Snes9xGX
+        zip -r Snes9xGX-CN-Full.zip ./apps ./snes9xgx
+        # zip -r Snes9xGX-GameCube.zip Snes9xGX-GameCube
 
     - name: Update Git Tag
       run: |
@@ -101,4 +103,4 @@ jobs:
         removeArtifacts: true
         replacesArtifacts: false
         tag: Pre-release
-        artifacts: "dist/*.zip"
+        artifacts: "dist/Snes9xGX/*.zip"
