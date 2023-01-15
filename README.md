@@ -1,6 +1,6 @@
 # Snes9x GX
 
-- [Snes9x GX ÖÐÎÄ°æ¼ò½é](./docs/README.md)
+- [Snes9x GX ä¸­æ–‡ç‰ˆç®€ä»‹](./docs/README.md)
 
 ---
 
