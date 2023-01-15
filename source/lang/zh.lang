@@ -43,6 +43,12 @@ msgstr "确定要重置你的控制器设定？"
 msgid "Are you sure that you want to reset your settings?"
 msgstr "确定要重置你的设定？"
 
+msgid "Artwork"
+msgstr "插图"
+
+msgid "Artwork Folder"
+msgstr "插图目录"
+
 msgid "Maintain Aspect Ratio"
 msgstr "保持宽高比例"
 
@@ -129,6 +135,9 @@ msgstr "控制器"
 
 msgid "Cover View"
 msgstr "封面预览"
+
+msgid "Covers"
+msgstr "封面"
 
 msgid "Covers Folder"
 msgstr "封面目录"
@@ -661,6 +670,24 @@ msgstr "画面位置"
 msgid "Screen Zoom"
 msgstr "画面缩放"
 
+msgid "Screenshot"
+msgstr "屏幕截图"
+
+msgid "Screenshots"
+msgstr "屏幕截图"
+
+msgid "Screenshots Folder"
+msgstr "截图目录"
+
+msgid "SD"
+msgstr "SD卡"
+
+msgid "SD Gecko Slot A"
+msgstr "SD Gecko金手指槽位A"
+
+msgid "SD Gecko Slot B"
+msgstr "SD Gecko金手指槽位B"
+
 msgid "Select"
 msgstr "选择键"
 
@@ -736,6 +763,9 @@ msgstr "超级任天堂 鼠标 - Wii右手柄"
 msgid "Snes9x - Copyright (c) Snes9x Team 1996 - 2022"
 msgstr "Snes9x - 版权(c) Snes9x开发小组1996-2022"
 
+msgid "Snes9x GX GameCube"
+msgstr "Snes9x GX GameCube版"
+
 msgid "Sound Effects Volume"
 msgstr "效果音的音量"
 
@@ -762,6 +792,9 @@ msgstr "未找到状态文件"
 
 msgid "Stretch to Fit"
 msgstr "适当的伸缩"
+
+msgid "Super Game Boy border"
+msgstr "GB的边缘"
 
 msgid "Super Scope"
 msgstr "Nintendo Scope光线枪"
@@ -943,9 +976,6 @@ msgstr "游戏金手指"
 msgid "FCE Ultra GX GameCube"
 msgstr "FCE Ultra GX GameCube版"
 
-msgid "Snes9x GX GameCube"
-msgstr "Snes9x GX GameCube版"
-
 msgid "Original FCE"
 msgstr "最初版的FCE"
 
@@ -961,20 +991,11 @@ msgstr "NTSC制式"
 msgid "PAL"
 msgstr "PAL制式"
 
-msgid "SD"
-msgstr "SD卡"
-
 msgid "USB"
 msgstr "USB装置"
 
 msgid "DVD"
 msgstr "DVD光盘"
-
-msgid "SD Gecko Slot A"
-msgstr "SD Gecko金手指槽位A"
-
-msgid "SD Gecko Slot B"
-msgstr "SD Gecko金手指槽位B"
 
 msgid "Chinese (Simplified)"
 msgstr "简体中文"
@@ -1027,14 +1048,8 @@ msgstr "显示虚拟内存"
 msgid "Delete"
 msgstr "删除"
 
-msgid "Screenshots Folder"
-msgstr "截图目录"
-
 msgid "WiiU Pro controller"
 msgstr "WiiU Pro 控制器"
-
-msgid "Screenshot"
-msgstr "屏幕截图"
 
 msgid "Preview Screenshot"
 msgstr "预览截图"
@@ -1045,17 +1060,11 @@ msgstr "保存一个新的预览截图吗？ 当前预览截图将会被覆盖�
 msgid "Preview Image"
 msgstr "预览图片"
 
-msgid "Artwork Folder"
-msgstr "插图目录"
-
 msgid "Emulation"
 msgstr "模拟设置"
 
 msgid "Hardware (GB/GBC)"
 msgstr "硬件 （GB/GBC）"
-
-msgid "Super Game Boy border"
-msgstr "GB的边缘"
 
 msgid "Offset from UTC (hours)"
 msgstr "UTC的时差（小时）"
