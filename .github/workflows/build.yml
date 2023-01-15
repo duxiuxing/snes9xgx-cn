@@ -25,20 +25,29 @@ jobs:
     
     - name: Copy Wii artifacts
       if: ${{ matrix.image == 'Wii' }}
-      run: | 
+      run: |
+        ##### ./apps/snes9xgx #####
         mkdir -p dist/Snes9xGX/apps/snes9xgx
-        mkdir -p dist/Snes9xGX/snes9xgx/roms
-        mkdir dist/Snes9xGX/snes9xgx/cheats
-        mkdir dist/Snes9xGX/snes9xgx/saves
-        touch dist/Snes9xGX/snes9xgx/roms/romsdir
-        touch dist/Snes9xGX/snes9xgx/cheats/cheatsdir
-        touch dist/Snes9xGX/snes9xgx/saves/savesdir
-        cp hbc/* dist/Snes9xGX/apps/snes9xgx/
+        cp executables/snes9xgx-wii.dol dist/Snes9xGX/apps/snes9xgx/boot.dol
         cp fonts/en.ttf dist/Snes9xGX/apps/snes9xgx/
         cp fonts/jp.ttf dist/Snes9xGX/apps/snes9xgx/
         cp fonts/ko.ttf dist/Snes9xGX/apps/snes9xgx/
         # cp fonts/zh.ttf dist/Snes9xGX/apps/snes9xgx/
-        cp executables/snes9xgx-wii.dol dist/Snes9xGX/apps/snes9xgx/boot.dol
+        cp hbc/icon.png dist/Snes9xGX/apps/snes9xgx/
+        cp hbc/meta.xml dist/Snes9xGX/apps/snes9xgx/
+        ##### ./snes9xgx  #####
+        mkdir -p dist/Snes9xGX/snes9xgx/artwork
+        touch dist/Snes9xGX/snes9xgx/artwork/artworkdir
+        mkdir dist/Snes9xGX/snes9xgx/cheats        
+        touch dist/Snes9xGX/snes9xgx/cheats/cheatsdir
+        mkdir -p dist/Snes9xGX/snes9xgx/covers
+        touch dist/Snes9xGX/snes9xgx/covers/coversdir
+        mkdir dist/Snes9xGX/snes9xgx/roms        
+        touch dist/Snes9xGX/snes9xgx/roms/romsdir
+        mkdir dist/Snes9xGX/snes9xgx/saves
+        touch dist/Snes9xGX/snes9xgx/saves/savesdir        
+        mkdir -p dist/Snes9xGX/snes9xgx/screenshots
+        touch dist/Snes9xGX/snes9xgx/screenshots/screenshotsdir        
 
     - name: Upload Wii artifacts
       uses: actions/upload-artifact@v3
@@ -47,7 +56,15 @@ jobs:
         name: Snes9xGX
         path: |
          dist/Snes9xGX/
-    
+
+    - name: Upload Sample artifacts
+      uses: actions/upload-artifact@v3
+      if: ${{ matrix.image == 'Wii' }}
+      with:
+        name: Snes9xGX-Sample
+        path: |
+         sample/
+
     - name: Build GameCube
       if: ${{ matrix.image == 'GameCube' }}
       run: |
