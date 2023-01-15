@@ -26,7 +26,7 @@ jobs:
     - name: Copy Wii artifacts
       if: ${{ matrix.image == 'Wii' }}
       run: |
-##### ./apps/snes9xgx #####
+        ##### ./apps/snes9xgx #####
         mkdir -p dist/Snes9xGX/apps/snes9xgx
         cp executables/snes9xgx-wii.dol dist/Snes9xGX/apps/snes9xgx/boot.dol
         # cp fonts/en.ttf dist/Snes9xGX/apps/snes9xgx/
