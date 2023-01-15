@@ -1,4 +1,9 @@
 # Snes9x GX
+
+- [Snes9x GX ÖÐÎÄ°æ¼ò½é](./docs/README.md)
+
+---
+
 https://github.com/dborth/snes9xgx (Under GPL License)
 
 Snes9x GX is a Super Nintendo / Super Famicom emulator for the Nintendo Wii, Snes9x GX is a port of Snes9x (http://www.snes9x.com).
