@@ -35,7 +35,7 @@ jobs:
         # cp fonts/zh.ttf dist/Snes9xGX/apps/snes9xgx/
         cp hbc/icon.png dist/Snes9xGX/apps/snes9xgx/
         cp hbc/meta.xml dist/Snes9xGX/apps/snes9xgx/
-        ##### ./snes9xgx  #####
+        ##### ./snes9xgx #####
         mkdir -p dist/Snes9xGX/snes9xgx/artwork
         touch dist/Snes9xGX/snes9xgx/artwork/artworkdir
         mkdir dist/Snes9xGX/snes9xgx/cheats        
@@ -47,7 +47,7 @@ jobs:
         mkdir dist/Snes9xGX/snes9xgx/saves
         touch dist/Snes9xGX/snes9xgx/saves/savesdir        
         mkdir -p dist/Snes9xGX/snes9xgx/screenshots
-        touch dist/Snes9xGX/snes9xgx/screenshots/screenshotsdir        
+        touch dist/Snes9xGX/snes9xgx/screenshots/screenshotsdir
 
     - name: Upload Wii artifacts
       uses: actions/upload-artifact@v3
@@ -56,14 +56,6 @@ jobs:
         name: Snes9xGX
         path: |
          dist/Snes9xGX/
-
-    - name: Upload Sample artifacts
-      uses: actions/upload-artifact@v3
-      if: ${{ matrix.image == 'Wii' }}
-      with:
-        name: Snes9xGX-Sample
-        path: |
-         sample/
 
     - name: Build GameCube
       if: ${{ matrix.image == 'GameCube' }}
