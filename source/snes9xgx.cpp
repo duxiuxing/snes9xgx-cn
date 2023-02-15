@@ -4,7 +4,7 @@
  * softdev July 2006
  * crunchy2 May 2007-July 2007
  * Michniewski 2008
- * Tantric 2008-2022
+ * Tantric 2008-2023
  *
  * snes9xgx.cpp
  *
@@ -533,6 +533,7 @@ int main(int argc, char *argv[])
 		Settings.Mute = GCSettings.MuteAudio;
 		Settings.SupportHiRes = (GCSettings.HiResolution == 1);
 		Settings.MaxSpriteTilesPerLine = (GCSettings.SpriteLimit ? 34 : 128);
+		Settings.SkipFrames = (GCSettings.FrameSkip ? AUTO_FRAMERATE : 0);
 		Settings.AutoDisplayMessages = (Settings.DisplayFrameRate || Settings.DisplayTime ? true : false);
 		Settings.MultiPlayer5Master = (GCSettings.Controller == CTRL_PAD4 ? true : false);
 		Settings.SuperScopeMaster = (GCSettings.Controller == CTRL_SCOPE ? true : false);

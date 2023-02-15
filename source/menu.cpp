@@ -1,7 +1,7 @@
 /****************************************************************************
  * Snes9x Nintendo Wii/Gamecube Port
  *
- * Tantric 2008-2022
+ * Tantric 2008-2023
  *
  * menu.cpp
  *
@@ -928,7 +928,7 @@ static void WindowCredits(void * ptr)
 
 	GuiText::SetPresets(12, (GXColor){0, 0, 0, 255}, 0, FTGX_JUSTIFY_CENTER | FTGX_ALIGN_TOP, ALIGN_CENTRE, ALIGN_BOTTOM);
 
-	txt[i] = new GuiText("Snes9x - Copyright (c) Snes9x Team 1996 - 2022");
+	txt[i] = new GuiText("Snes9x - Copyright (c) Snes9x Team 1996 - 2023");
 	txt[i]->SetPosition(0,-44); i++;
 	txt[i] = new GuiText("This software is open source and may be copied, distributed, or modified ");
 	txt[i]->SetPosition(0,-32); i++;
@@ -3687,6 +3687,7 @@ static int MenuSettingsVideo()
 	sprintf(options.name[i++], "Video Mode");
 	sprintf(options.name[i++], "SNES Hi-Res Mode");
 	sprintf(options.name[i++], "Sprites Per-Line Limit");
+	sprintf(options.name[i++], "Frame Skipping");
 	sprintf(options.name[i++], "Crosshair");
 	sprintf(options.name[i++], "Show Framerate");
 	sprintf(options.name[i++], "Show Local Time");
@@ -3778,7 +3779,7 @@ static int MenuSettingsVideo()
 
 			case 5:
 				GCSettings.videomode++;
-				if(GCSettings.videomode > 4)
+				if(GCSettings.videomode > 5)
 					GCSettings.videomode = 0;
 				break;
 				
@@ -3791,18 +3792,22 @@ static int MenuSettingsVideo()
 				break;
 
 			case 8:
+				GCSettings.FrameSkip ^= 1;
+				break;
+
+			case 9:
 				GCSettings.crosshair ^= 1;
 				break;
 				
-			case 9:
+			case 10:
 				Settings.DisplayFrameRate ^= 1;
 				break;
 				
-			case 10:
+			case 11:
 				Settings.DisplayTime ^= 1;
 				break;
 				
-			case 11:
+			case 12:
 				#ifdef HW_RVL
 				GCSettings.sfxOverclock++;
 				if (GCSettings.sfxOverclock > 6) {
@@ -3863,31 +3868,34 @@ static int MenuSettingsVideo()
 				case 2:
 					sprintf (options.value[5], "Progressive (480p)"); break;
 				case 3:
-					sprintf (options.value[5], "PAL (50Hz)"); break;
+					sprintf (options.value[5], "Progressive (576p)"); break;
 				case 4:
+					sprintf (options.value[5], "PAL (50Hz)"); break;
+				case 5:
 					sprintf (options.value[5], "PAL (60Hz)"); break;
 			}
 			sprintf (options.value[6], "%s", GCSettings.HiResolution == 1 ? "On" : "Off");
 			sprintf (options.value[7], "%s", GCSettings.SpriteLimit == 1 ? "On" : "Off");
-			sprintf (options.value[8], "%s", GCSettings.crosshair == 1 ? "On" : "Off");
-			sprintf (options.value[9], "%s", Settings.DisplayFrameRate ? "On" : "Off");
-			sprintf (options.value[10], "%s", Settings.DisplayTime ? "On" : "Off");
+			sprintf (options.value[8], "%s", GCSettings.FrameSkip == 1 ? "On" : "Off");
+			sprintf (options.value[9], "%s", GCSettings.crosshair == 1 ? "On" : "Off");
+			sprintf (options.value[10], "%s", Settings.DisplayFrameRate ? "On" : "Off");
+			sprintf (options.value[11], "%s", Settings.DisplayTime ? "On" : "Off");
 			switch(GCSettings.sfxOverclock)
 			{
 				case 0:
-					sprintf (options.value[11], "Default"); break;
+					sprintf (options.value[12], "Default"); break;
 				case 1:
-					sprintf (options.value[11], "20 MHz"); break;
+					sprintf (options.value[12], "20 MHz"); break;
 				case 2:
-					sprintf (options.value[11], "40 MHz"); break;
+					sprintf (options.value[12], "40 MHz"); break;
 				case 3:
-					sprintf (options.value[11], "60 MHz"); break;
+					sprintf (options.value[12], "60 MHz"); break;
 				case 4:
-					sprintf (options.value[11], "80 MHz"); break;
+					sprintf (options.value[12], "80 MHz"); break;
 				case 5:
-					sprintf (options.value[11], "100 MHz"); break;
+					sprintf (options.value[12], "100 MHz"); break;
 				case 6:
-					sprintf (options.value[11], "120 MHz"); break;
+					sprintf (options.value[12], "120 MHz"); break;
 			}
 			optionBrowser.TriggerUpdate();
 		}
