@@ -51,11 +51,7 @@ Snes9x GX 是 Wii 上面著名的超任（超级任天堂）模拟器，[官方�
 
 ## 4. Snes9xGX-Forwarder.zip
 
-网友制作的专属频道，界面效果如下：
-
-![频道图标](./forwarder-icon.png)
-
-![频道预览](./forwarder-banner.png)
+网友制作的 Snes9x GX 频道安装包，界面效果可参考[《Snes9x GX 自制频道一览》](../forwarder/README.md)。
 
 ## 5. Snes9xGX-Sample.zip
 
