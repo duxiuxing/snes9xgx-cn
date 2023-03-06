@@ -1,24 +1,32 @@
 # Snes9x GX 自制频道一览
 
 
-## Snes9xGX-Forwarder-SDXD.wad
+## 一、Snes9xGX-Forwarder1-SNES.wad
 
-![频道图标](./Snes9xGX-Forwarder-SDXD-icon.png)
+| Icon | Banner |
+| :---: | :---: |
+| ![Icon](./Snes9xGX-Forwarder1-SNES-icon.png) | ![Banner](./Snes9xGX-Forwarder1-SNES-banner.png) |
 
-![频道预览](./Snes9xGX-Forwarder-SDXD-banner.png)
 
-## Snes9xGX-Forwarder-SDXD-TWN4.3.wad
+## 二、Snes9xGX-Forwarder2-SNES.wad
 
-TWN4.3 系统专用，基于 FCEUltraGX-Forwarder1-FCEU.wad 制作，提示文字修改为繁体中文：
+| Icon | Banner |
+| :---: | :---: |
+| ![Icon](./Snes9xGX-Forwarder2-SNES-icon.png) | ![Banner](./Snes9xGX-Forwarder2-SNES-banner.png) |
 
-![频道图标](./Snes9xGX-Forwarder-SDXD-TWN4.3-icon.png)
 
-预览画面的中央展示模拟器的英文名：
+## 三、Snes9xGX-Forwarder-SDXD.wad
 
-![频道预览](./Snes9xGX-Forwarder-SDXD-TWN4.3-banner.png)
+| Icon | Banner |
+| :---: | :---: |
+| ![Icon](./Snes9xGX-Forwarder-SDXD-icon.png) | ![Banner](./Snes9xGX-Forwarder-SDXD-banner.png) |
 
-## Snes9xGX-Forwarder-SNES.wad
 
-![频道图标](./Snes9xGX-Forwarder-SNES-icon.png)
+## 四、Snes9xGX-Forwarder-SDXD-TWN4.3.wad
 
-![频道预览](./Snes9xGX-Forwarder-SNES-banner.png)
+TWN4.3 系统专用，基于 Snes9xGX-Forwarder-SDXD.wad 制作：
+
+| Icon | Banner |
+| :---: | :---: |
+| ![Icon](./Snes9xGX-Forwarder-SDXD-TWN4.3-icon.png) | ![Banner](./Snes9xGX-Forwarder-SDXD-TWN4.3-banner.png) |
+| 提示文字修改为繁体中文 | 中央展示模拟器的英文名 |
