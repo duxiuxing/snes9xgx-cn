@@ -9,13 +9,13 @@ Snes9x GX 是 Wii 上面著名的超任（超级任天堂）模拟器，[官方�
 
 以下是各个下载文件的说明：
 
-## 1. Snes9xGX-CN.zip
+## 一、Snes9xGX-CN.zip
 
 模拟器的中文版，与模拟器的中文完整版（Snes9xGX-CN-Full.zip）择一下载即可：
 
 ![中文版](./cn-only-description.png)
 
-## 2. Snes9xGX-CN-Full.zip
+## 二、Snes9xGX-CN-Full.zip
 
 模拟器的中文完整版，由于打包了外语字库，所以总的文件体积会略大一些：
 
@@ -37,7 +37,7 @@ Snes9x GX 是 Wii 上面著名的超任（超级任天堂）模拟器，[官方�
 | 11 | 巴西葡萄牙语 | 12 | 加泰罗尼亚语 |
 | 13 | 土耳其语 | | |
 
-## 3. Snes9xGX-Channel-Installer.zip
+## 三、Snes9xGX-Channel-Installer.zip
 
 官方提供的频道安装器，可以在系统桌面安装一个模拟器的专属频道：
 
@@ -45,30 +45,26 @@ Snes9x GX 是 Wii 上面著名的超任（超级任天堂）模拟器，[官方�
 
 打开频道就可以打开模拟器：
 
-![频道图标](./channel-icon.png)
+| Icon | Banner |
+| :---: | :---: |
+| ![Icon](./channel-icon.png) | ![Banner](./channel-banner.png) |
 
-![频道预览](./channel-banner.png)
 
-## 4. Snes9xGX-Sample.zip
+## 四、Snes9xGX-Sample.zip
 
-演示文件，解压到 SD 卡或者 USB 设备的 snes9xgx 文件夹，即可在模拟器中选择游戏进行试玩，按 (+) 键可切换预览图片的类型。
+演示文件，解压到 SD 卡或者 USB 设备的 snes9xgx 文件夹，即可在模拟器中选择游戏进行试玩，按 [+] 键可切换预览图片的类型。
 
-屏幕截图：
-
-![屏幕截图](./snes9xgx-cn.png)
-
-封面：
-
-![封面](./preview-image-cover.png)
-
-插图：
-
-![插图](./preview-image-artwork.png)
+- 截图
+  ![截图](./snes9xgx-cn.png)
+- 封面
+  ![封面](./preview-image-cover.png)
+- 插图
+  ![插图](./preview-image-artwork.png)
 
 在 `设定 - 保存 & 读取` 可设置三种预览图片的检索目录：
 
 ![设置预览图片的检索目录](./settings-saving-loading.png)
 
-## 5. Snes9xGX-Forwarder*.wad
+## 五、Snes9xGX-Forwarder*.wad
 
 网友制作的 Snes9x GX 频道安装包，界面效果可参考[《Snes9x GX 自制频道一览》](../forwarder/README.md)。
