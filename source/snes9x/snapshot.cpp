@@ -48,7 +48,7 @@ enum
 };
 
 #define COUNT(ARRAY)				(sizeof(ARRAY) / sizeof(ARRAY[0]))
-#define Offset(field, structure)	((int) (((char *) (&(((structure) NULL)->field))) - ((char *) NULL)))
+#define Offset(field, structure)	((int) (((char *) (&(((structure) 1)->field))) - ((char *) 1)))
 #define OFFSET(f)					Offset(f, STRUCT *)
 #define DUMMY(f)					Offset(f, struct Obsolete *)
 #define DELETED(f)					(-1)
@@ -1009,11 +1009,7 @@ void S9xResetSaveTimer (bool8 dontsave)
 
 	if (!Settings.DontSaveOopsSnapshot && !dontsave && t != -1 && time(NULL) - t > 300)
 	{
-		char	filename[PATH_MAX + 1];
-		char	drive[_MAX_DRIVE + 1], dir[_MAX_DIR + 1], def[_MAX_FNAME + 1], ext[_MAX_EXT + 1];
-
-		_splitpath(Memory.ROMFilename, drive, dir, def, ext);
-		snprintf(filename, PATH_MAX + 1, "%s%s%s.%.*s", S9xGetDirectory(SNAPSHOT_DIR), SLASH_STR, def, _MAX_EXT - 1, "oops");
+		const char *filename = S9xGetFilename("oops", SNAPSHOT_DIR);
 		S9xMessage(S9X_INFO, S9X_FREEZE_FILE_INFO, SAVE_INFO_OOPS);
 		S9xFreezeGame(filename);
 	}
@@ -1069,6 +1065,38 @@ int S9xUnfreezeGameMem (const uint8 *buf, uint32 bufSize)
 	return result;
 }
 
+void S9xMessageFromResult(int result, const char* base)
+{
+    switch(result)
+    {
+        case WRONG_FORMAT:
+            S9xMessage(S9X_ERROR, S9X_WRONG_FORMAT, SAVE_ERR_WRONG_FORMAT);
+            break;
+
+        case WRONG_VERSION:
+            S9xMessage(S9X_ERROR, S9X_WRONG_VERSION, SAVE_ERR_WRONG_VERSION);
+            break;
+
+        case WRONG_MOVIE_SNAPSHOT:
+            S9xMessage(S9X_ERROR, S9X_WRONG_MOVIE_SNAPSHOT, MOVIE_ERR_SNAPSHOT_WRONG_MOVIE);
+            break;
+
+        case NOT_A_MOVIE_SNAPSHOT:
+            S9xMessage(S9X_ERROR, S9X_NOT_A_MOVIE_SNAPSHOT, MOVIE_ERR_SNAPSHOT_NOT_MOVIE);
+            break;
+
+        case SNAPSHOT_INCONSISTENT:
+            S9xMessage(S9X_ERROR, S9X_SNAPSHOT_INCONSISTENT, MOVIE_ERR_SNAPSHOT_INCONSISTENT);
+            break;
+
+        case FILE_NOT_FOUND:
+        default:
+            sprintf(String, SAVE_ERR_ROM_NOT_FOUND, base);
+            S9xMessage(S9X_ERROR, S9X_ROM_NOT_FOUND, String);
+            break;
+    }
+}
+
 bool8 S9xUnfreezeGame (const char *filename)
 {
 	STREAM	stream = NULL;
@@ -1088,35 +1116,7 @@ bool8 S9xUnfreezeGame (const char *filename)
 
 		if (result != SUCCESS)
 		{
-			switch (result)
-			{
-				case WRONG_FORMAT:
-					S9xMessage(S9X_ERROR, S9X_WRONG_FORMAT, SAVE_ERR_WRONG_FORMAT);
-					break;
-
-				case WRONG_VERSION:
-					S9xMessage(S9X_ERROR, S9X_WRONG_VERSION, SAVE_ERR_WRONG_VERSION);
-					break;
-
-				case WRONG_MOVIE_SNAPSHOT:
-					S9xMessage(S9X_ERROR, S9X_WRONG_MOVIE_SNAPSHOT, MOVIE_ERR_SNAPSHOT_WRONG_MOVIE);
-					break;
-
-				case NOT_A_MOVIE_SNAPSHOT:
-					S9xMessage(S9X_ERROR, S9X_NOT_A_MOVIE_SNAPSHOT, MOVIE_ERR_SNAPSHOT_NOT_MOVIE);
-					break;
-
-				case SNAPSHOT_INCONSISTENT:
-					S9xMessage(S9X_ERROR, S9X_SNAPSHOT_INCONSISTENT, MOVIE_ERR_SNAPSHOT_INCONSISTENT);
-					break;
-
-				case FILE_NOT_FOUND:
-				default:
-					sprintf(String, SAVE_ERR_ROM_NOT_FOUND, base);
-					S9xMessage(S9X_ERROR, S9X_ROM_NOT_FOUND, String);
-					break;
-			}
-
+            S9xMessageFromResult(result, base);
 			return (FALSE);
 		}
 
@@ -1139,6 +1139,34 @@ bool8 S9xUnfreezeGame (const char *filename)
 	S9xMessage(S9X_INFO, S9X_FREEZE_FILE_INFO, String);
 
 	return (FALSE);
+}
+
+bool8 S9xUnfreezeScreenshot(const char *filename, uint16 **image_buffer, int &width, int &height)
+{
+    STREAM	stream = NULL;
+
+    const char	*base = S9xBasename(filename);
+
+    if(S9xOpenSnapshotFile(filename, TRUE, &stream))
+    {
+        int	result;
+
+        result = S9xUnfreezeScreenshotFromStream(stream, image_buffer, width, height);
+        S9xCloseSnapshotFile(stream);
+
+        if(result != SUCCESS)
+        {
+            S9xMessageFromResult(result, base);
+            return (FALSE);
+        }
+
+        return (TRUE);
+    }
+
+    sprintf(String, SAVE_ERR_SAVE_NOT_FOUND, base);
+    S9xMessage(S9X_INFO, S9X_FREEZE_FILE_INFO, String);
+
+    return (FALSE);
 }
 
 void S9xFreezeToStream (STREAM stream)
@@ -1795,6 +1823,96 @@ int S9xUnfreezeFromStream (STREAM stream)
 	if (local_movie_data)		delete [] local_movie_data;
 
 	return (result);
+}
+
+// load screenshot from file, allocating memory for it
+int S9xUnfreezeScreenshotFromStream(STREAM stream, uint16 **image_buffer, int &width, int &height)
+{
+    int		result = SUCCESS;
+    int		version, len;
+    char	buffer[PATH_MAX + 1];
+
+    len = strlen(SNAPSHOT_MAGIC) + 1 + 4 + 1;
+    if(READ_STREAM(buffer, len, stream) != (unsigned int)len)
+        return (WRONG_FORMAT);
+
+    if(strncmp(buffer, SNAPSHOT_MAGIC, strlen(SNAPSHOT_MAGIC)) != 0)
+        return (WRONG_FORMAT);
+
+    version = atoi(&buffer[strlen(SNAPSHOT_MAGIC) + 1]);
+    if(version > SNAPSHOT_VERSION)
+        return (WRONG_VERSION);
+
+    result = UnfreezeBlock(stream, "NAM", (uint8 *)buffer, PATH_MAX);
+    if(result != SUCCESS)
+        return (result);
+
+    uint8	*local_screenshot = NULL;
+
+    // skip all blocks until screenshot
+    SkipBlockWithName(stream, "CPU");
+    SkipBlockWithName(stream, "REG");
+    SkipBlockWithName(stream, "PPU");
+    SkipBlockWithName(stream, "DMA");
+    SkipBlockWithName(stream, "VRA");
+    SkipBlockWithName(stream, "RAM");
+    SkipBlockWithName(stream, "SRA");
+    SkipBlockWithName(stream, "FIL");
+    SkipBlockWithName(stream, "SND");
+    SkipBlockWithName(stream, "CTL");
+    SkipBlockWithName(stream, "TIM");
+    SkipBlockWithName(stream, "SFX");
+    SkipBlockWithName(stream, "SA1");
+    SkipBlockWithName(stream, "SAR");
+    SkipBlockWithName(stream, "DP1");
+    SkipBlockWithName(stream, "DP2");
+    SkipBlockWithName(stream, "DP4");
+    SkipBlockWithName(stream, "CX4");
+    SkipBlockWithName(stream, "ST0");
+    SkipBlockWithName(stream, "OBC");
+    SkipBlockWithName(stream, "OBM");
+    SkipBlockWithName(stream, "S71");
+    SkipBlockWithName(stream, "SRT");
+    SkipBlockWithName(stream, "CLK");
+    SkipBlockWithName(stream, "BSX");
+    SkipBlockWithName(stream, "MSU");
+    result = UnfreezeStructCopy(stream, "SHO", &local_screenshot, SnapScreenshot, COUNT(SnapScreenshot), version);
+
+
+    if(result == SUCCESS && local_screenshot)
+    {
+        SnapshotScreenshotInfo	*ssi = new SnapshotScreenshotInfo;
+
+        UnfreezeStructFromCopy(ssi, SnapScreenshot, COUNT(SnapScreenshot), local_screenshot, version);
+
+        width = min(ssi->Width, IMAGE_WIDTH);
+        height = min(ssi->Height, IMAGE_HEIGHT);
+
+        *image_buffer = (uint16 *)malloc(width * height * sizeof(uint16));
+
+        uint8	*rowpix = ssi->Data;
+        uint16	*screen = (*image_buffer);
+
+        for(int y = 0; y < height; y++, screen += width)
+        {
+            for(int x = 0; x < width; x++)
+            {
+                uint32	r, g, b;
+
+                r = *(rowpix++);
+                g = *(rowpix++);
+                b = *(rowpix++);
+
+                screen[x] = BUILD_PIXEL(r, g, b);
+            }
+        }
+
+        delete ssi;
+    }
+
+    if(local_screenshot)		delete[] local_screenshot;
+
+    return (result);
 }
 
 static int FreezeSize (int size, int type)
