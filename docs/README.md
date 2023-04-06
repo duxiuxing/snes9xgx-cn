@@ -15,6 +15,7 @@ Snes9x GX 是 Wii 上面著名的超任（超级任天堂）模拟器，[官方�
 
 ![中文版](./cn-only-description.png)
 
+
 ## 二、Snes9xGX-CN-Full.zip
 
 模拟器的中文完整版，由于打包了外语字库，所以总的文件体积会略大一些：
@@ -37,20 +38,8 @@ Snes9x GX 是 Wii 上面著名的超任（超级任天堂）模拟器，[官方�
 | 11 | 巴西葡萄牙语 | 12 | 加泰罗尼亚语 |
 | 13 | 土耳其语 | | |
 
-## 三、Snes9xGX-Channel-Installer.zip
 
-官方提供的频道安装器，可以在系统桌面安装一个模拟器的专属频道：
-
-![频道安装器](./channel-installer.png)
-
-打开频道就可以打开模拟器：
-
-| Icon | Banner |
-| :---: | :---: |
-| ![Icon](./channel-icon.png) | ![Banner](./channel-banner.png) |
-
-
-## 四、Snes9xGX-Sample.zip
+## 三、Snes9xGX-Sample.zip
 
 演示文件，解压到 SD 卡或者 USB 设备的 snes9xgx 文件夹，即可在模拟器中选择游戏进行试玩，按 [+] 键可切换预览图片的类型。
 
@@ -65,6 +54,7 @@ Snes9x GX 是 Wii 上面著名的超任（超级任天堂）模拟器，[官方�
 
 ![设置预览图片的检索目录](./settings-saving-loading.png)
 
-## 五、Snes9xGX-Forwarder*.wad
 
-网友制作的 Snes9x GX 频道安装包，界面效果可参考[《Snes9x GX 自制频道一览》](../forwarder/README.md)。
+## 四、Snes9xGX-Channel-Installer.zip 和 Snes9xGX-Forwarder*.wad
+
+Snes9x GX 频道安装包，可以在系统桌面安装模拟器的专属频道，打开频道就可以打开模拟器。界面效果可参考[《Snes9x GX 频道一览》](../forwarder/README.md)。
