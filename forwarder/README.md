@@ -22,11 +22,11 @@
 | ![Icon](./Snes9xGX-Forwarder-SDXD-icon.png) | ![Banner](./Snes9xGX-Forwarder-SDXD-banner.png) |
 
 
-## 四、Snes9xGX-Forwarder-SDXD-TWN4.3.wad
+## 四、Snes9xGX-Forwarder-SDXD-ZHTW.wad
 
-TWN4.3 系统专用，基于 Snes9xGX-Forwarder-SDXD.wad 制作：
+繁体中文系统专用，基于 Snes9xGX-Forwarder-SDXD.wad 制作：
 
 | Icon | Banner |
 | :---: | :---: |
-| ![Icon](./Snes9xGX-Forwarder-SDXD-TWN4.3-icon.png) | ![Banner](./Snes9xGX-Forwarder-SDXD-TWN4.3-banner.png) |
+| ![Icon](./Snes9xGX-Forwarder-SDXD-ZHTW-icon.png) | ![Banner](./Snes9xGX-Forwarder-SDXD-ZHTW-banner.png) |
 | 提示文字修改为繁体中文 | 中央展示模拟器的英文名 |
