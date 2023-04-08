@@ -43,3 +43,10 @@
 | :---: | :---: |
 | ![Icon](./Snes9xGX-Forwarder-SDXD-ZHTW-icon.png) | ![Banner](./Snes9xGX-Forwarder-SDXD-ZHTW-banner.png) |
 | 提示文字修改为繁体中文 | 中央展示模拟器的英文名 |
+
+
+## 六、Snes9xGX-RunningSnakes-DSNB.wad
+
+| Icon | Banner |
+| :---: | :---: |
+| ![Icon](./Snes9xGX-RunningSnakes-DSNB-icon.png) | ![Banner](./Snes9xGX-RunningSnakes-DSNB-banner.png) |
