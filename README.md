@@ -41,13 +41,14 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
 
 ## FEATURES
 
-* Based on Snes9x 1.60 (with faster Blargg S-SMP module)
+* Based on Snes9x 1.62.3 (with faster Blargg S-SMP module)
 * Wiimote, Nunchuk, Wii Classic, Wii Pro, Wii Super NES Classic, 
   Wii U Pro, and Gamecube controller support
 * Wii U GamePad support (requires homebrew injection into Wii U VC title)
 * Retrode/Xbox 360/Hornet controller support
 * SNES Superscope, Mouse, Justifier support
 * Cheat support
+* Artwork (artwork, cover or screenshot) support
 * Satellaview (BS-X) support
 * Auto Load/Save Game Snapshots and SRAM
 * Custom controller configurations
@@ -61,10 +62,27 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
 
 ## UPDATE HISTORY
 
+[4.5.4 - July 31, 2023]
+* Compiled with latest devkitPPC/libogc
+* Updated to newer Snes9x (bladeoner)
+* Switch to chosen video mode on first load if not automatic
+* Added frameskip option and added PAL 576p support (Tanooki16)
+* Added SNES Hi-Res Mode ON/OFF and Sprite Limit ON/OFF (Tanooki16)
+* Disabled peripheral devices by default if not selected in controller settings (Tanooki16)
+* Added support for BML-format .cht files and text scrolling for cheat names (InfiniteBlueGX)
+* Added a B/1 button press to cancel the button remapping prompt (InfiniteBlueGX)
+* Fixed default game selection menu "jump" upon startup w/classic controller (InfiniteBlueGX)
+* Fixed a crash when selecting Cancel after removing an SD/USB device and re-opening the app (InfiniteBlueGX)
+* Added option to mute game audio (InfiniteBlueGX)
+* Added 1+2+Plus menu toggle option for Wiimote (InfiniteBlueGX)
+* Added new controller configuration options for the SNES Mouse (InfiniteBlueGX)
+* Added option to choose which button/combo is used to toggle the menu (InfiniteBlueGX)
+* Added option to remap the ABXY buttons to the right analog stick (InfiniteBlueGX)
+
 [4.5.3 - June 15, 2022]
 
 * Compiled with latest devkitPPC/libogc
-* Updated to latest Snes9x
+* Updated to latest Snes9x (bladeoner)
 * Added "Enable Turbo Mode" toggle to the Video Settings menu (based on InfiniteBlueGX's code)
 * Updated translations
 * Improved forwarder support
@@ -874,6 +892,15 @@ the Sound Effects Volume. The Exit Action can be set to "Return to Loader",
 "Return to Wii Menu" and "Power off Wii". The Wiimote Orientation can be set
 to Vertical or Horizontal and then you can increase and decrease the Music
 and Sound Effects Volume.
+
+### ARTWORK
+
+Artwork, covers or screenshots will be displayed on the main menu when
+each game is selected. Select which type to display on the menu by going
+to Settings > Menu > Preview Image. Each image resides in the respectively
+named folder (eg: sd:/snes9xgx/covers). They should be a PNG named exactly 
+the same as as the rom and sized no more than 640px by 480px. Recommendend 
+format is 316px x 224px PNG with a 32bit depth.
 
 ### NETWORK
 
