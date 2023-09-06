@@ -111,8 +111,6 @@ enum {
 	LANG_DEFAULT = LANG_SIMP_CHINESE
 };
 
-#define MULTI_LANGUAGE_SUPPORT
-
 struct SGCSettings{
 	int		AutoLoad;
 	int		AutoSave;

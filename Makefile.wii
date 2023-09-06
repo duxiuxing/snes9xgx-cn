@@ -30,7 +30,7 @@ INCLUDES	:=	source source/snes9x
 CFLAGS	= -g -O3 -Wall $(MACHDEP) $(INCLUDE) `freetype-config --cflags` \
 				-DHAVE_STDINT_H -DBLARGG_NONPORTABLE -DBLARGG_BIG_ENDIAN -DBLARGG_CPU_POWERPC \
 				-DZLIB -DRIGHTSHIFT_IS_SAR -DCPU_SHUTDOWN -DCORRECT_VRAM_READS \
-				-D_SZ_ONE_DIRECTORY -D_LZMA_IN_CB -D_LZMA_OUT_READ \
+				-D_SZ_ONE_DIRECTORY -D_LZMA_IN_CB -D_LZMA_OUT_READ -DMULTI_LANGUAGE_SUPPORT \
 				-fomit-frame-pointer \
 				-Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-strict-aliasing \
 				-Wno-format -Wno-format-overflow -Wno-stringop-truncation -Wno-stringop-overflow -Wno-format-truncation -Wno-narrowing -Wno-sign-compare \
