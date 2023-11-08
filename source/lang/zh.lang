@@ -509,7 +509,7 @@ msgid "Maintain Aspect Ratio"
 msgstr "保持宽高比例"
 
 msgid "Map ABXY to Right Stick"
-msgstr "ABXY 键映射到右摇杆"
+msgstr "ABXY 键对应右摇杆"
 
 msgid "Match GC Controls"
 msgstr "匹配 GC 控制器"
