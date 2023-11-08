@@ -373,6 +373,9 @@ msgstr "硬件（GB/GBC）"
 msgid "Hide RAM Saving"
 msgstr "隐藏 RAM 保存"
 
+msgid "Hide SRAM Saving"
+msgstr "隐藏 SRAM 保存"
+
 msgid "HOME"
 msgstr "HOME 键"
 
