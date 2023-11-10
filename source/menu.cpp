@@ -924,7 +924,7 @@ static void WindowCredits(void * ptr)
 	txt[i]->SetPosition(20,-60); i++;
 	txt[i] = new GuiText(wiiDetails, 14, (GXColor){0, 0, 0, 255});
 	txt[i]->SetAlignment(ALIGN_RIGHT, ALIGN_BOTTOM);
-	txt[i]->SetPosition(-20,-60); i++;
+	txt[i]->SetPosition(-20,-44); i++;
 
 	GuiText::SetPresets(12, (GXColor){0, 0, 0, 255}, 0, FTGX_JUSTIFY_CENTER | FTGX_ALIGN_TOP, ALIGN_CENTRE, ALIGN_BOTTOM);
 
