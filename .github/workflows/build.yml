@@ -11,10 +11,10 @@ jobs:
         # image: ["Wii", "GameCube"]
         image: ["Wii"] # only for Wii
     container: devkitpro/devkitppc:latest
- 
+
     steps:
     - name: Checkout snes9xgx repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -22,7 +22,7 @@ jobs:
       if: ${{ matrix.image == 'Wii' }}
       run: |
         make -f Makefile.wii -j2
-    
+
     - name: Copy Wii artifacts
       if: ${{ matrix.image == 'Wii' }}
       run: |
@@ -50,31 +50,31 @@ jobs:
         touch dist/Snes9xGX/snes9xgx/screenshots/screenshotsdir
 
     - name: Upload Wii artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ matrix.image == 'Wii' }}
-      with: 
+      with:
         name: Snes9xGX-CN
         path: |
-         dist/Snes9xGX/
+          dist/Snes9xGX/
 
     - name: Build GameCube
       if: ${{ matrix.image == 'GameCube' }}
       run: |
         make -f Makefile.gc -j2
-        
+
     - name: Copy GameCube artifact
       if: ${{ matrix.image == 'GameCube' }}
-      run: | 
+      run: |
         mkdir -p dist/Snes9xGX-GameCube
         cp executables/snes9xgx-gc.dol dist/Snes9xGX-GameCube/
-    
+
     - name: Upload GameCube artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: ${{ matrix.image == 'GameCube' }}
-      with: 
+      with:
         name: Snes9xGX-GameCube
         path: |
-         dist/Snes9xGX-GameCube/
+          dist/Snes9xGX-GameCube/
 
   release:
     name: Release
@@ -84,12 +84,12 @@ jobs:
 
     steps:
     - name: Checkout snes9xgx repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
-    - name: Download Artifacts 
-      uses: actions/download-artifact@v3
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
       with:
         path: dist
 
@@ -103,7 +103,7 @@ jobs:
       run: |
         git tag -f Pre-release
         git push -f origin Pre-release
-    
+
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
