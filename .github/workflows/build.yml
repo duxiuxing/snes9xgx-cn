@@ -53,7 +53,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: ${{ matrix.image == 'Wii' }}
       with:
-        name: Snes9xGX-CN
+        name: Snes9xGX-HK
         path: |
           dist/Snes9xGX/
 
