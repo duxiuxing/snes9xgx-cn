@@ -2,10 +2,12 @@
 <app version="1">
   <name>Snes9x GX</name>
   <coder>Tantric, Zopenko, Askot, R-Sam</coder>
-  <version>4.5.4</version>
+  <version>4.5.4.hk</version>
   <release_date>20230731</release_date>
   <short_description>Super Nintendo Emulator</short_description> 
-  <long_description>1. A port of Snes9x to the Wii;
+  <long_description>Website: https://github.com/duxiuxing/snes9xgx-cn
+
+1. A port of Snes9x to the Wii;
 2. Use of Traditional Chinese as the UI language;
 3. Support rom files named in Chinese (Simplified and Traditional).</long_description> 
   <ahb_access />
