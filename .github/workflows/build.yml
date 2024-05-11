@@ -53,7 +53,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: ${{ matrix.image == 'Wii' }}
       with:
-        name: Snes9xGX.v4.5.4.cn
+        name: Snes9xGX.v4.5.5.cn
         path: |
           dist/Snes9xGX/
 
@@ -96,7 +96,7 @@ jobs:
     - name: Re-zip artifacts
       run: |
         cd dist/Snes9xGX
-        zip -r Snes9xGX.v4.5.4.world.zip ./apps ./snes9xgx
+        zip -r Snes9xGX.v4.5.5.world.zip ./apps ./snes9xgx
         # zip -r Snes9xGX-GameCube.zip Snes9xGX-GameCube
 
     - name: Update Git Tag
