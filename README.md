@@ -1,6 +1,9 @@
 # Snes9x GX
 
+
+- world 分支是基于 master 分支拉取的
 - [Snes9x GX 中文版简介](./docs/README.md)
+
 
 ---
 
