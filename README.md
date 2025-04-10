@@ -56,6 +56,7 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
   Wii U Pro, and Gamecube controller support
 * Wii U GamePad support (requires homebrew injection into Wii U VC title)
 * Retrode/Xbox 360/Hornet controller support
+* Mayflash PC044 and MF105 SNES to USB adapter support
 * SNES Superscope, Mouse, Justifier support
 * Cheat support
 * Artwork (artwork, cover or screenshot) support
@@ -71,6 +72,12 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
 
 
 ## UPDATE HISTORY
+
+[4.5.6] 
+
+* Compiled with latest devkitPPC/libogc2
+* Added support for the Mayflash MF105 adapter (thanks Tyler Sanders!)
+* Added upstream SRAM/ExtHiROM fixes from Snes9x
 
 [4.5.5 - March 30, 2024]
 * Added 2xBR, 2xBR-lv1 and DDT video filters (Hyllian)
@@ -110,7 +117,7 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
 
 [4.5.2 - March 23, 2021]
 
-* Added support for Mayflash 2-port SNES USB adapter (thanks EthanArmbrust!)
+* Added support for Mayflash PC044 2-port SNES USB adapter (thanks EthanArmbrust!)
 * Added L+R+START for back to menu for Wii Classic Controller
 * Updated French translation (thanks Tanooki16!)
 * Fixed issue with displaying screenshots
