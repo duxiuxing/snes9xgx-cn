@@ -62,7 +62,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: ${{ matrix.image == 'Wii' }}
       with:
-        name: Snes9xGX
+        name: Snes9xGX-world
         path: |
           dist/Snes9xGX/
 
@@ -104,7 +104,7 @@ jobs:
 
     - name: Re-zip artifacts
       run: |
-        cd dist/Snes9xGX
+        cd dist/Snes9xGX-world
         zip -r Snes9xGX.v4.5.5.world.zip ./apps ./snes9xgx
         # zip -r Snes9xGX-GameCube.zip Snes9xGX-GameCube
 
@@ -121,4 +121,4 @@ jobs:
         removeArtifacts: true
         replacesArtifacts: false
         tag: Pre-release
-        artifacts: "dist/Snes9xGX/*.zip"
+        artifacts: "dist/Snes9xGX-world/*.zip"
