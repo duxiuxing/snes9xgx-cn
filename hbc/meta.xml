@@ -3,12 +3,12 @@
   <name>Snes9x GX</name>
   <coder>Tantric, Zopenko, Askot, R-Sam</coder>
   <version>4.5.5.cn</version>
-  <release_date>20240330</release_date>
+  <release_date>2024/3/30</release_date>
   <short_description>Super Nintendo Emulator</short_description> 
-  <long_description>Website: https://github.com/duxiuxing/snes9xgx-cn
-
-1. A port of Snes9x to the Wii;
+  <long_description>1. A port of Snes9x to the Wii;
 2. Use of Simplified Chinese as the UI language;
-3. Support rom files named in Chinese (Simplified and Traditional).</long_description> 
+3. Support rom files named in Chinese (Simplified and Traditional).
+
+Website: https://github.com/duxiuxing/snes9xgx-cn</long_description>
   <ahb_access />
 </app>
