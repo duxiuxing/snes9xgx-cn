@@ -1,7 +1,11 @@
 # Snes9x GX
 
 
-- world 分支是基于 master 分支拉取的
+- 各个分支说明：
+  1. master 分支用于同步 dborth/snes9xgx 的代码；
+  2. world 分支是基于 master 分支拉取的，用于构建世界版，支持多语言；
+  3. hk 分支是基于 world 分支拉取的，用于构建繁体中文版；
+  4. cn 分支是基于 world 分支拉取的，用于构建简体中文版；
 - [Snes9x GX 中文版简介](./docs/README.md)
 
 
