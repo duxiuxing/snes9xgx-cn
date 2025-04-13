@@ -8,7 +8,6 @@
   4. cn 分支是基于 world 分支拉取的，用于构建简体中文版；
 - [Snes9x GX 中文版简介](./docs/README.md)
 
-
 ---
 
 https://github.com/dborth/snes9xgx (Under GPL License)
