@@ -105,9 +105,17 @@ jobs:
 
     - name: Re-zip artifacts
       run: |
-        cd dist/Snes9xGX-cn
-        zip -r Snes9xGX.v4.5.5.cn.zip ./apps ./snes9xgx
-        # zip -r Snes9xGX-GameCube.zip Snes9xGX-GameCube
+        cd dist
+        cd Snes9xGX-cn
+        rm -r snes9xgx/artwork/*
+        rm -r snes9xgx/cheats/*
+        rm -r snes9xgx/covers/*
+        rm -r snes9xgx/roms/*
+        rm -r snes9xgx/saves/*
+        rm -r snes9xgx/screenshots/*
+        zip -r ../Snes9xGX-v4.5.6.cn.zip *
+        # cd ../Snes9xGX-GameCube
+        # zip -r ../Snes9xGX-GameCube.zip *
 
     - name: Update Git Tag
       run: |
@@ -122,4 +130,4 @@ jobs:
         removeArtifacts: true
         replacesArtifacts: false
         tag: Pre-release
-        artifacts: "dist/Snes9xGX-cn/*.zip"
+        artifacts: "dist/*.zip"
