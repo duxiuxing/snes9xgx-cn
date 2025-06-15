@@ -868,43 +868,43 @@ static void WindowCredits(void * ptr)
 
 	GuiText::SetPresets(20, (GXColor){0, 0, 0, 255}, 0, FTGX_JUSTIFY_LEFT | FTGX_ALIGN_TOP, ALIGN_LEFT, ALIGN_TOP);
 	txt[i] = new GuiText("Coding & menu design");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("Tantric");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 	txt[i] = new GuiText("Additional improvements");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("Zopenko, michniewski");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 	txt[i] = new GuiText("InfiniteBlue, others");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 	txt[i] = new GuiText("Menu artwork");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("the3seashells");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 	txt[i] = new GuiText("Menu sound");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("Peter de Man");
-	txt[i]->SetPosition(350,y); i++; y+=48;
+	txt[i]->SetPosition(335,y); i++; y+=48;
 
 	txt[i] = new GuiText("Snes9x GX GameCube");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("SoftDev, crunchy2,");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 	txt[i] = new GuiText("eke-eke, others");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 	txt[i] = new GuiText("Snes9x");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("Snes9x Team");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 
 	txt[i] = new GuiText("libogc / devkitPPC");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("shagkur & WinterMute");
-	txt[i]->SetPosition(350,y); i++; y+=24;
+	txt[i]->SetPosition(335,y); i++; y+=24;
 	txt[i] = new GuiText("FreeTypeGX");
-	txt[i]->SetPosition(60,y); i++;
+	txt[i]->SetPosition(40,y); i++;
 	txt[i] = new GuiText("Armin Tamzarian");
-	txt[i]->SetPosition(350,y); i++;
+	txt[i]->SetPosition(335,y); i++;
 
 	char wiiDetails[30];
 	char wiiInfo[20];
@@ -926,14 +926,14 @@ static void WindowCredits(void * ptr)
 
 	txt[i] = new GuiText(controllerInfo, 14, (GXColor){0, 0, 0, 255});
 	txt[i]->SetAlignment(ALIGN_LEFT, ALIGN_BOTTOM);
-	txt[i]->SetPosition(20,-60); i++;
+	txt[i]->SetPosition(10,-60); i++;
 	txt[i] = new GuiText(wiiDetails, 14, (GXColor){0, 0, 0, 255});
 	txt[i]->SetAlignment(ALIGN_RIGHT, ALIGN_BOTTOM);
 	txt[i]->SetPosition(-20,-44); i++;
 
 	GuiText::SetPresets(12, (GXColor){0, 0, 0, 255}, 0, FTGX_JUSTIFY_CENTER | FTGX_ALIGN_TOP, ALIGN_CENTRE, ALIGN_BOTTOM);
 
-	txt[i] = new GuiText("Snes9x - Copyright (c) Snes9x Team 1996 - 2023");
+	txt[i] = new GuiText("Snes9x - Copyright (c) Snes9x Team 1996 - 2025");
 	txt[i]->SetPosition(0,-44); i++;
 	txt[i] = new GuiText("This software is open source and may be copied, distributed, or modified ");
 	txt[i]->SetPosition(0,-32); i++;
