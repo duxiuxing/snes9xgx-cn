@@ -113,7 +113,7 @@ jobs:
         rm -r snes9xgx/roms/*
         rm -r snes9xgx/saves/*
         rm -r snes9xgx/screenshots/*
-        zip -r ../Snes9xGX-v4.5.6.world.zip *
+        zip -r ../Snes9xGX-v4.5.7.world.zip *
         # cd ../Snes9xGX-GameCube
         # zip -r ../Snes9xGX-GameCube.zip *
 
