@@ -76,6 +76,11 @@ Wii homebrew is WiiBrew (www.wiibrew.org).
 
 ## UPDATE HISTORY
 
+[4.5.7 - July 30, 2025]
+
+* Added GC Loader support (mrysav)
+* Compiled with latest devkitPPC/libogc2
+
 [4.5.6 - May 18, 2025] 
 
 * Compiled with latest devkitPPC/libogc2
