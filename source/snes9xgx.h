@@ -153,7 +153,7 @@ struct SGCSettings{
 	int		SFXVolume;
 	int		Rumble;
 
-#ifdef MULTI_LANGUAGE_SUPPORT
+#ifdef MULTI_LANGUAGES_SUPPORT
 private:
 	int 	language;
 public:

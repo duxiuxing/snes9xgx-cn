@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <app version="1">
   <name>Snes9x GX</name>
-  <coder>Tantric, Zopenko, Askot, R-Sam</coder>
+  <coder>Tantric, Zopenko, Askot &amp; R-Sam</coder>
   <version>4.5.7.cn</version>
   <release_date>20250730</release_date>
   <short_description>Super Nintendo Emulator</short_description> 
-  <long_description>1. A port of Snes9x to the Wii;
-2. Use of Simplified Chinese as the UI language;
-3. Support rom files named in Simplified Chinese.
+  <long_description>- A port of Snes9x to the Wii
+- Use of Simplified Chinese as the UI language
+- Support rom files named in Simplified Chinese
 
 Website: https://github.com/duxiuxing/snes9xgx-cn</long_description>
+  <no_ios_reload />
   <ahb_access />
 </app>
