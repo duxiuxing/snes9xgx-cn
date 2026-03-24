@@ -25,17 +25,11 @@ msgstr "7z 解壓縮失敗：使用了不支援的壓縮設置"
 msgid "A (Rapid)"
 msgstr "A（連發）"
 
-msgid "Additional coding"
-msgstr "額外的編碼"
-
 msgid "Additional improvements"
 msgstr "其他優化"
 
 msgid "Aim Offscreen"
 msgstr "不顯示瞄準準星"
-
-msgid "An update is available!"
-msgstr "有一個新的版本！"
 
 msgid "Append Auto to .SAV Files"
 msgstr "自動添加到 .SAV 文件"
@@ -54,9 +48,6 @@ msgstr "插圖"
 
 msgid "Artwork Folder"
 msgstr "插圖目錄"
-
-msgid "AspiringSquire's Real palette"
-msgstr "AspiringSquire 的真實調色板"
 
 msgid "Attempting to determine load device..."
 msgstr "正在試圖從設備中讀取…"
@@ -139,35 +130,20 @@ msgstr "傳統控制器"
 msgid "Close"
 msgstr "關閉"
 
-msgid "Coding"
-msgstr "編碼"
-
 msgid "Coding & menu design"
 msgstr "編碼 & 功能表設計"
-
-msgid "Compressed GBA files are not supported!"
-msgstr "不支援壓縮的 GBA 檔！"
 
 msgid "Connecting to network share..."
 msgstr "正在連接網路共用檔…"
 
-msgid "Controles"
-msgstr "控制裝置"
-
 msgid "Controller"
 msgstr "控制器"
-
-msgid "Cover View"
-msgstr "封面預覽"
 
 msgid "Covers"
 msgstr "封面"
 
 msgid "Covers Folder"
 msgstr "封面目錄"
-
-msgid "CrashMan's palette"
-msgstr "CrashMan 的調色板"
 
 msgid "Credits"
 msgstr "作者資訊"
@@ -211,9 +187,6 @@ msgstr "關閉"
 msgid "DISABLED"
 msgstr "關閉"
 
-msgid "Display Virtual Memory"
-msgstr "顯示虛擬記憶體"
-
 msgid "distributed, or modified under the terms of the"
 msgstr "在以下的條件下發佈、修改"
 
@@ -240,9 +213,6 @@ msgstr "duxiuxing/snes9xgx-cn"
 
 msgid "Empty or invalid ZIP file!"
 msgstr "空或不正確的 ZIP 檔！"
-
-msgid "Emulation"
-msgstr "模擬設置"
 
 msgid "Enabled"
 msgstr "啟動"
@@ -358,29 +328,11 @@ msgstr "遊戲速度"
 msgid "GameCube Controller"
 msgstr "GameCube 控制器"
 
-msgid "GB Screen Palette"
-msgstr "GB 螢幕調色板"
-
-msgid "GBA Fixed Pixel Ratio"
-msgstr "GBA 固定圖元比例"
-
-msgid "GBA Frameskip"
-msgstr "GBA 跳幀"
-
-msgid "GBA Screen Zoom"
-msgstr "GBA 畫面縮放"
-
 msgid "German"
 msgstr "德語"
 
 msgid "Go Back"
 msgstr "返回"
-
-msgid "Hardware (GB/GBC)"
-msgstr "硬體（GB/GBC）"
-
-msgid "Hide RAM Saving"
-msgstr "隱藏 RAM 保存"
 
 msgid "Hide SRAM Saving"
 msgstr "隱藏 SRAM 保存"
@@ -426,9 +378,6 @@ msgstr "無效的保存檔"
 
 msgid "Invalid state file"
 msgstr "無效的狀態檔"
-
-msgid "IOS: %d"
-msgstr "IOS：%d"
 
 msgid "Italian"
 msgstr "義大利語"
@@ -490,35 +439,17 @@ msgstr "讀取"
 msgid "Loading DVD..."
 msgstr "從 DVD 讀取中…"
 
-msgid "Loading patch..."
-msgstr "從 Patch 讀取中…"
-
 msgid "Loading..."
 msgstr "讀取中…"
 
 msgid "Logo"
 msgstr "圖形標識"
 
-msgid "Loopy's palette"
-msgstr "Loopy 的調色板"
-
 msgid "Main Menu"
 msgstr "主菜單"
 
-msgid "Maintain Aspect Ratio"
-msgstr "保持寬高比例"
-
 msgid "Map ABXY to Right Stick"
 msgstr "ABXY 鍵對應右搖杆"
-
-msgid "Match GC Controls"
-msgstr "匹配 GC 控制器"
-
-msgid "Match Wii Controls"
-msgstr "匹配 Wii 控制器"
-
-msgid "Matthew Conte's palette"
-msgstr "Matthew Conte 的調色板"
 
 msgid "Maximum filepath length reached!"
 msgstr "檔路徑長度達到最大！"
@@ -534,9 +465,6 @@ msgstr "功能表音樂"
 
 msgid "Menu Toggle"
 msgstr "功能表開關"
-
-msgid "MESS palette"
-msgstr "MESS 調色板"
 
 msgid "Minus"
 msgstr "減號鍵"
@@ -664,18 +592,6 @@ msgstr "PAL 制式（50Hz）"
 msgid "PAL (60Hz)"
 msgstr "PAL 制式（60Hz）"
 
-msgid "Palette"
-msgstr "調色板"
-
-msgid "Palette saved"
-msgstr "調色板保存了"
-
-msgid "Partial Stretch"
-msgstr "部分拉伸"
-
-msgid "PasoFami/99 palette"
-msgstr "PasoFami/99 調色板"
-
 msgid "Pause"
 msgstr "暫停"
 
@@ -729,9 +645,6 @@ msgstr "退出遊戲"
 
 msgid "Quit this game? Any unsaved progress will be lost."
 msgstr "退出遊戲嗎？未保存的進度將丟失。"
-
-msgid "Quor's palette"
-msgstr "Quor 的調色板"
 
 msgid "R TRIG"
 msgstr "R 扳機"
@@ -802,9 +715,6 @@ msgstr "保存的目錄"
 msgid "Save Game"
 msgstr "保存遊戲"
 
-msgid "Save RAM and State?"
-msgstr "保存 RAM 和狀態嗎？"
-
 msgid "Save SRAM and State?"
 msgstr "保存 SRAM 和狀態嗎？"
 
@@ -855,9 +765,6 @@ msgstr "SD Gecko 金手指槽位 A"
 
 msgid "SD Gecko Slot B"
 msgstr "SD Gecko 金手指槽位 B"
-
-msgid "Seek error!"
-msgstr "讀取錯誤！"
 
 msgid "Select"
 msgstr "選擇鍵"
@@ -946,9 +853,6 @@ msgstr "效果音的音量"
 msgid "Spanish"
 msgstr "西班牙語"
 
-msgid "Sprite Limit"
-msgstr "畫面限制"
-
 msgid "Sprites Per-Line Limit"
 msgstr "畫面限制"
 
@@ -969,9 +873,6 @@ msgstr "未找到狀態檔"
 
 msgid "Stretch to Fit"
 msgstr "適當的伸縮"
-
-msgid "Super Game Boy border"
-msgstr "GB 的邊緣"
 
 msgid "Super Scope"
 msgstr "超任光槍"
@@ -1096,15 +997,6 @@ msgstr "VM32：未知的頁面型態！"
 msgid "VM8: Unknown page type!"
 msgstr "VM8：未知的頁面型態！"
 
-msgid "VS Castlevania palette"
-msgstr "VS Castlevania 調色板"
-
-msgid "VS Dr. Mario palette"
-msgstr "VS Dr. Mario 調色板"
-
-msgid "VS SMB/VS Ice Climber palette"
-msgstr "VS SMB/VS Ice Climber 調色板"
-
 msgid "Wii U Pro Controller"
 msgstr "Wii U Pro 控制器"
 
@@ -1114,17 +1006,8 @@ msgstr "Wii 右手柄"
 msgid "Wiimote Orientation"
 msgstr "Wii 右手柄方向"
 
-msgid "WiiU Pro controller"
-msgstr "WiiU Pro 控制器"
-
 msgid "Yes"
 msgstr "是"
-
-msgid "Zaphod's VS Castlevania palette"
-msgstr "Zaphod's VS Castlevania 調色板"
-
-msgid "Zaphod's VS SMB palette"
-msgstr "Zaphod's VS SMB 調色板"
 
 msgid "Zapper"
 msgstr "光槍"
