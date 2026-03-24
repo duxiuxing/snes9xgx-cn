@@ -29,7 +29,7 @@ msgid "Additional improvements"
 msgstr "其他优化"
 
 msgid "Aim Offscreen"
-msgstr "不显示准星"
+msgstr "装弹"
 
 msgid "Append Auto to .SAV Files"
 msgstr ".SAV 文件名加 Auto"
@@ -154,6 +154,9 @@ msgstr "裁剪"
 msgid "Crosshair"
 msgstr "十字准线"
 
+msgid "Cubic"
+msgstr "三次插值"
+
 msgid "Cursor"
 msgstr "光标"
 
@@ -197,10 +200,10 @@ msgid "Don't Save"
 msgstr "不保存"
 
 msgid "Down"
-msgstr "下"
+msgstr "十字键的下"
 
 msgid "DOWN"
-msgstr "下"
+msgstr "下键"
 
 msgid "Downloading..."
 msgstr "下载中…"
@@ -281,7 +284,7 @@ msgid "Filtered (Soft)"
 msgstr "柔化滤镜"
 
 msgid "Filtering"
-msgstr "滤镜"
+msgstr "图像算法"
 
 msgid "Fire"
 msgstr "开火"
@@ -331,6 +334,9 @@ msgstr "游戏制式"
 msgid "GameCube Controller"
 msgstr "NGC 手柄"
 
+msgid "Gaussian (Accurate)"
+msgstr "高斯分布 (精确)"
+
 msgid "German"
 msgstr "德语"
 
@@ -349,6 +355,12 @@ msgstr "HOME 键 / 右摇杆"
 msgid "Horizontal"
 msgstr "水平方向"
 
+msgid "hq2x Bold"
+msgstr "hq2x 强化"
+
+msgid "hq2x Soft"
+msgstr "hq2x 柔化"
+
 msgid "Information"
 msgstr "信息"
 
@@ -360,6 +372,9 @@ msgstr "投币"
 
 msgid "Insert Coin / Switch Disk"
 msgstr "投币 / 切换磁盘驱动器"
+
+msgid "Interpolation"
+msgstr "插值算法"
 
 msgid "Invalid file size!"
 msgstr "无效的文件大小！"
@@ -424,6 +439,9 @@ msgstr "鼠标左键"
 msgid "libogc / devkitPPC"
 msgstr "libogc / devkitPPC"
 
+msgid "Linear"
+msgstr "线性分布"
+
 msgid "Load"
 msgstr "读取"
 
@@ -431,10 +449,10 @@ msgid "Load Device"
 msgstr "读取设备"
 
 msgid "Load Folder"
-msgstr "读取目录"
+msgstr "游戏文件夹"
 
 msgid "Load Game"
-msgstr "读取游戏"
+msgstr "读取进度"
 
 msgid "Loading"
 msgstr "读取"
@@ -480,6 +498,9 @@ msgstr "音乐音量"
 
 msgid "Mute"
 msgstr "静音"
+
+msgid "Mute Game Audio"
+msgstr "屏蔽游戏音频"
 
 msgid "NES Controller"
 msgstr "红白机手柄"
@@ -641,7 +662,7 @@ msgid "Preview Image"
 msgstr "预览图片"
 
 msgid "Preview Screenshot"
-msgstr "预览截图"
+msgstr "截屏"
 
 msgid "Progressive (480p)"
 msgstr "逐行扫描（480p）"
@@ -657,9 +678,6 @@ msgstr "确定要退出游戏吗？ 未保存的进度会全部丢失。"
 
 msgid "R TRIG"
 msgstr "右扳机"
-
-msgid "RAM"
-msgstr "电池存档"
 
 msgid "RAM saving is not available for FDS games!"
 msgstr "FDS 游戏不支持电池存档！"
@@ -805,6 +823,9 @@ msgstr "显示本地时间"
 msgid "Simp_chinese"
 msgstr "简体中文"
 
+msgid "Sinc"
+msgstr "辛克插值"
+
 msgid "SMB Share IP"
 msgstr "SMB 共享 IP"
 
@@ -844,6 +865,15 @@ msgstr "超任 Hi-Res 模式"
 msgid "SNES Mouse"
 msgstr "超任鼠标"
 
+msgid "SNES Mouse (Port 1)"
+msgstr "超任鼠标 (端口1)"
+
+msgid "SNES Mouse (Port 2)"
+msgstr "超任鼠标 (端口2)"
+
+msgid "SNES Mouse (Both Ports)"
+msgstr "超任鼠标 (全部端口)"
+
 msgid "SNES Mouse - GameCube Controller"
 msgstr "超任鼠标 - NGC 手柄"
 
@@ -867,6 +897,9 @@ msgstr "西班牙语"
 
 msgid "Sprites Per-Line Limit"
 msgstr "画面限制"
+
+msgid "SRAM"
+msgstr "电池存档"
 
 msgid "SRAM file not found"
 msgstr "没有找到电池存档文件"
@@ -910,7 +943,7 @@ msgstr "当前的 IOS 已被篡改，软件功能或稳定性可能会受到影�
 msgid "The current IOS is unsupported. Functionality and/or stability may be adversely affected."
 msgstr "当前的 IOS 不受支持，软件功能或稳定性可能会受到影响。"
 
-msgid "This software is open source and may be copied, distributed, or modified"
+msgid "This software is open source and may be copied, distributed, or modified "
 msgstr "依据 GNU 通用公共许可证 (GPL) 第 2 版的条款，"
 
 msgid "Trad_chinese"
@@ -930,6 +963,9 @@ msgstr "开启连发"
 
 msgid "Turkish"
 msgstr "土耳其语"
+
+msgid "TV Mode"
+msgstr "老电视模式 (扫描线)"
 
 msgid "Unable to initialize network!"
 msgstr "无法初始化网络！"
