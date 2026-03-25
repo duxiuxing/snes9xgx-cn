@@ -53,7 +53,7 @@ msgid "Attempting to determine load device..."
 msgstr "正在检测读取设备..."
 
 msgid "Attempting to determine save device..."
-msgstr "正在试图向设备中写入…"
+msgstr "正在检测保存设备..."
 
 msgid "Audio"
 msgstr "音频"
@@ -134,7 +134,7 @@ msgid "Coding & menu design"
 msgstr "编码 & 菜单设计"
 
 msgid "Connecting to network share..."
-msgstr "正在连接网络共享文件…"
+msgstr "正在连接网络共享..."
 
 msgid "Controller"
 msgstr "控制器"
@@ -206,7 +206,7 @@ msgid "DOWN"
 msgstr "下键"
 
 msgid "Downloading..."
-msgstr "下载中…"
+msgstr "正在下载..."
 
 msgid "Dutch"
 msgstr "荷兰语"
@@ -365,13 +365,13 @@ msgid "Information"
 msgstr "信息"
 
 msgid "Initializing network..."
-msgstr "连接网络中…"
+msgstr "正在初始化网络..."
 
 msgid "Insert Coin"
 msgstr "投币"
 
 msgid "Insert Coin / Switch Disk"
-msgstr "投币 / 切换磁盘驱动器"
+msgstr "投币 / 换盘"
 
 msgid "Interpolation"
 msgstr "插值算法"
@@ -761,7 +761,7 @@ msgid "Saving preferences..."
 msgstr "正在保存设置..."
 
 msgid "Saving..."
-msgstr "保存中…"
+msgstr "正在保存..."
 
 msgid "Scaling"
 msgstr "缩放"
