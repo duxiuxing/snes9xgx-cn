@@ -901,6 +901,9 @@ msgstr "画面限制"
 msgid "SRAM"
 msgstr "电池存档"
 
+msgid "SRAM (Auto)"
+msgstr "电池存档 (自动)"
+
 msgid "SRAM file not found"
 msgstr "没有找到电池存档文件"
 
@@ -912,6 +915,9 @@ msgstr "开始键"
 
 msgid "State"
 msgstr "即时存档"
+
+msgid "State (Auto)"
+msgstr "即时存档 (自动)"
 
 msgid "State file not found"
 msgstr "没有找到即时存档文件"
@@ -943,7 +949,7 @@ msgstr "当前的 IOS 已被篡改，软件功能或稳定性可能会受到影�
 msgid "The current IOS is unsupported. Functionality and/or stability may be adversely affected."
 msgstr "当前的 IOS 不受支持，软件功能或稳定性可能会受到影响。"
 
-msgid "This software is open source and may be copied, distributed, or modified "
+msgid "This software is open source and may be copied, distributed, or modified"
 msgstr "依据 GNU 通用公共许可证 (GPL) 第 2 版的条款，"
 
 msgid "Trad_chinese"
