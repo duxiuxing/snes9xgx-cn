@@ -1106,7 +1106,7 @@ char* GetUSBControllerInfo()
 			first_device = false;
 		}
 		else
-			strcat(info, ", Retrode: connected")
+			strcat(info, ", Retrode: connected");
 	}
 
 	if (strcmp(XBOX360_Status(), connected) == 0)
@@ -1117,7 +1117,7 @@ char* GetUSBControllerInfo()
 			first_device = false;
 		}
 		else
-			strcat(info, ", XBOX360: connected")
+			strcat(info, ", XBOX360: connected");
 	}
 
 	if (strcmp(Hornet_Status(), connected) == 0)
@@ -1128,7 +1128,7 @@ char* GetUSBControllerInfo()
 			first_device = false;
 		}
 		else
-			strcat(info, ", Hornet: connected")
+			strcat(info, ", Hornet: connected");
 	}
 
 	if (strcmp(Mayflash_Status(), connected) == 0)
@@ -1139,7 +1139,7 @@ char* GetUSBControllerInfo()
 			first_device = false;
 		}
 		else
-			strcat(info, ", Mayflash: connected")
+			strcat(info, ", Mayflash: connected");
 	}
 
 	return info;
