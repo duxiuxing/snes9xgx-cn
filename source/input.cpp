@@ -1093,7 +1093,55 @@ void SetDefaultButtonMap ()
 char* GetUSBControllerInfo()
 {
     static char info[100];
-    snprintf(info, 100, "Retrode: %s, XBOX360: %s, Hornet: %s, Mayflash: %s", Retrode_Status(), XBOX360_Status(), Hornet_Status(), Mayflash_Status());
-    return info;
+	strcpy(info, "USB Controller: not connected");
+
+	bool first_device = true;
+	char connected[] = "connected";
+	
+	if (strcmp(Retrode_Status(), connected) == 0)
+	{
+		if (first_device)
+		{
+			strcpy(info, "Retrode: connected");
+			first_device = false;
+		}
+		else
+			strcat(info, ", Retrode: connected");
+	}
+
+	if (strcmp(XBOX360_Status(), connected) == 0)
+	{
+		if (first_device)
+		{
+			strcpy(info, "XBOX360: connected");
+			first_device = false;
+		}
+		else
+			strcat(info, ", XBOX360: connected");
+	}
+
+	if (strcmp(Hornet_Status(), connected) == 0)
+	{
+		if (first_device)
+		{
+			strcpy(info, "Hornet: connected");
+			first_device = false;
+		}
+		else
+			strcat(info, ", Hornet: connected");
+	}
+
+	if (strcmp(Mayflash_Status(), connected) == 0)
+	{
+		if (first_device)
+		{
+			strcpy(info, "Mayflash: connected");
+			first_device = false;
+		}
+		else
+			strcat(info, ", Mayflash: connected");
+	}
+
+	return info;
 }
 #endif
