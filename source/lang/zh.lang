@@ -677,10 +677,10 @@ msgid "Reset Game"
 msgstr "重启游戏"
 
 msgid "Reset Mappings"
-msgstr "恢复默认映射"
+msgstr "重置映射"
 
 msgid "Reset Settings"
-msgstr "恢复默认设置"
+msgstr "重置设置"
 
 msgid "Reset this game? Any unsaved progress will be lost."
 msgstr "确定要重启游戏吗？ 未保存的进度会全部丢失。"
@@ -863,10 +863,13 @@ msgid "SNES Mouse - Wiimote"
 msgstr "超任鼠标 - Wii 右手柄"
 
 msgid "Snes9x - Copyright (c) Snes9x Team 1996 - 2025"
-msgstr "Snes9x - 版权所有 (c) Snes9x 团队 1996 - 2025"
+msgstr "Snes9x - 版权所有 (c) Snes9x 团队 1996 - 2026"
 
 msgid "Snes9x GX GameCube"
 msgstr "GitHub 上的项目"
+
+msgid "Snes9x Team"
+msgstr "Snes9x 团队"
 
 msgid "SoftDev, crunchy2,"
 msgstr "dborth/snes9xgx"
@@ -931,7 +934,7 @@ msgstr "当前的 IOS 已被篡改，软件功能或稳定性可能会受到影�
 msgid "The current IOS is unsupported. Functionality and/or stability may be adversely affected."
 msgstr "当前的 IOS 不受支持，软件功能或稳定性可能会受到影响。"
 
-msgid "This software is open source and may be copied, distributed, or modified"
+msgid "This software is open source and may be copied, distributed, or modified "
 msgstr "依据 GNU 通用公共许可证 (GPL) 第 2 版的条款，"
 
 msgid "Trad_chinese"
