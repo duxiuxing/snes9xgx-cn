@@ -926,7 +926,7 @@ static void WindowCredits(void * ptr)
 
 	txt[i] = new GuiText(controllerInfo, 14, (GXColor){0, 0, 0, 255});
 	txt[i]->SetAlignment(ALIGN_LEFT, ALIGN_BOTTOM);
-	txt[i]->SetPosition(10,-60); i++;
+	txt[i]->SetPosition(20,-44); i++;
 	txt[i] = new GuiText(wiiDetails, 14, (GXColor){0, 0, 0, 255});
 	txt[i]->SetAlignment(ALIGN_RIGHT, ALIGN_BOTTOM);
 	txt[i]->SetPosition(-20,-44); i++;
@@ -2906,11 +2906,7 @@ ButtonMappingWindow()
 	switch(mapMenuCtrl)
 	{
 		case CTRLR_GCPAD:
-			#ifdef HW_RVL
-			sprintf(msg, "Press any button on the GameCube Controller now. Press Home or the C-Stick in any direction to clear the existing mapping.");
-			#else
 			sprintf(msg, "Press any button on the GameCube Controller now. Press the C-Stick in any direction to clear the existing mapping.");
-			#endif
 			break;
 		case CTRLR_WIIMOTE:
 			sprintf(msg, "Press any button on the Wiimote now. Press Home to clear the existing mapping.");
