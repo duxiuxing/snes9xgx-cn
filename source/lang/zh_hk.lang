@@ -598,9 +598,6 @@ msgstr "設定保存了"
 msgid "Press any button on the Classic Controller now. Press Home to clear the existing mapping."
 msgstr "按下傳統手柄任意鍵（按 HOME 鍵清空映射）"
 
-msgid "Press any button on the GameCube Controller now. Press Home or the C-Stick in any direction to clear the existing mapping."
-msgstr "按下 GC 手柄任意鍵（按 HOME 鍵或 C 搖杆任意方向鍵清空映射）"
-
 msgid "Press any button on the GameCube Controller now. Press the C-Stick in any direction to clear the existing mapping."
 msgstr "按下 GC 手柄任意鍵（按 C 搖杆任意方向鍵清空映射）"
 
