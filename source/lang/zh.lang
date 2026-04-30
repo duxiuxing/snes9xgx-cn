@@ -337,6 +337,9 @@ msgstr "HOME 键 / 右摇杆"
 msgid "Horizontal"
 msgstr "水平方向"
 
+msgid "Hornet: connected"
+msgstr "Hornet 手柄：已连接"
+
 msgid "hq2x Bold"
 msgstr "hq2x 强化"
 
@@ -456,6 +459,9 @@ msgstr "ABXY 键对应右摇杆"
 
 msgid "Maximum filepath length reached!"
 msgstr "文件路径长度达到最大！"
+
+msgid "Mayflash: connected"
+msgstr "Mayflash 街机摇杆：已连接"
 
 msgid "Menu"
 msgstr "菜单"
@@ -681,6 +687,9 @@ msgstr "重置设置"
 
 msgid "Reset this game? Any unsaved progress will be lost."
 msgstr "确定要重启游戏吗？ 未保存的进度会全部丢失。"
+
+msgid "Retrode: connected"
+msgstr "Retrode 适配器：已连接"
 
 msgid "Retry"
 msgstr "重试"
