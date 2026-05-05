@@ -1161,7 +1161,6 @@ static int MenuGameSelection()
 					ShutoffRumble();
 					#endif
 					mainWindow->SetState(STATE_DISABLED);
-					SavePrefs(SILENT);
 					if(BrowserLoadFile())
 						menu = MENU_EXIT;
 					else
@@ -4211,8 +4210,11 @@ static int MenuSettings()
 				"Yes",
 				"No");
 
-			if(choice == 1)
+			if(choice == 1) {
 				DefaultSettings();
+				autoSaveMethod(SILENT);
+				autoLoadMethod(SILENT);
+			}
 		}
 	}
 
@@ -4374,7 +4376,7 @@ static int MenuSettingsFile()
 			if(GCSettings.SaveMethod == DEVICE_DVD)
 				GCSettings.SaveMethod++;
 
-			// don't allow SD Gecko on Wii
+			// skip GameCube devices on Wii
 			#ifdef HW_RVL
 			if(GCSettings.LoadMethod == DEVICE_SD_SLOTA)
 				GCSettings.LoadMethod++;
@@ -4387,6 +4389,10 @@ static int MenuSettingsFile()
 			if(GCSettings.LoadMethod == DEVICE_SD_PORT2)
 				GCSettings.LoadMethod++;
 			if(GCSettings.SaveMethod == DEVICE_SD_PORT2)
+				GCSettings.SaveMethod++;
+			if(GCSettings.LoadMethod == DEVICE_SD_GCLOADER)
+				GCSettings.LoadMethod++;
+			if(GCSettings.SaveMethod == DEVICE_SD_GCLOADER)
 				GCSettings.SaveMethod++;
 			#endif
 
@@ -4440,6 +4446,8 @@ static int MenuSettingsFile()
 		if(backBtn.GetState() == STATE_CLICKED)
 		{
 			menu = MENU_SETTINGS;
+			autoSaveMethod(SILENT);
+			autoLoadMethod(SILENT);
 		}
 	}
 	HaltGui();
@@ -4858,8 +4866,12 @@ MainMenu (int menu)
 		ResumeGui();
 
 	if(firstRun) {
-		if(!LoadPrefs())
-			SavePrefs(SILENT);
+		LoadPrefs();
+		autoSaveMethod(SILENT);
+		autoLoadMethod(SILENT);
+
+		CreateMissingDirectories();
+		SavePrefs(SILENT);
 	}
 
 #ifdef HW_RVL
