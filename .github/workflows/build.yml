@@ -33,7 +33,7 @@ jobs:
         cp fonts/jp.ttf dist/Snes9xGX/apps/snes9xgx/
         cp fonts/ko.ttf dist/Snes9xGX/apps/snes9xgx/
         cp fonts/zh_cn.ttf dist/Snes9xGX/apps/snes9xgx/
-        cp fonts/zh_hk.ttf dist/Snes9xGX/apps/snes9xgx/
+        # cp fonts/zh_hk.ttf dist/Snes9xGX/apps/snes9xgx/
         cp hbc/icon.png dist/Snes9xGX/apps/snes9xgx/
         cp hbc/meta.xml dist/Snes9xGX/apps/snes9xgx/
         ##### ./snes9xgx #####

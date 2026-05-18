@@ -140,8 +140,7 @@ enum {
 	LANG_CATALAN,
 	LANG_TURKISH,
 	LANG_SWEDISH,
-	LANG_LENGTH,
-	LANG_DEFAULT = LANG_ENGLISH
+	LANG_LENGTH
 };
 
 struct SGCSettings{
@@ -183,24 +182,7 @@ struct SGCSettings{
 	int		MusicVolume;
 	int		SFXVolume;
 	int		Rumble;
-
-#ifdef MULTI_LANGUAGES_SUPPORT
-private:
-	int 	language;
-public:
-	int Language() { return language; }
-	void SetLanguage(int value)
-	{
-		if (value < 0 || value >= LANG_LENGTH)
-			value = LANG_DEFAULT;
-		language = value;
-
-	}
-#else
-	int Language() { return LANG_DEFAULT; }
-	void SetLanguage(int value) {}
-#endif
-
+	int		language;
 	int		PreviewImage;
 
 	int		sfxOverclock;

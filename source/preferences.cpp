@@ -173,7 +173,7 @@ preparePrefsData ()
 	createXMLSetting("MusicVolume", "Music Volume", toStr(GCSettings.MusicVolume));
 	createXMLSetting("SFXVolume", "Sound Effects Volume", toStr(GCSettings.SFXVolume));
 	createXMLSetting("Rumble", "Rumble", toStr(GCSettings.Rumble));
-	createXMLSetting("language", "Language", toStr(GCSettings.Language()));
+	createXMLSetting("language", "Language", toStr(GCSettings.language));
 	createXMLSetting("PreviewImage", "Preview Image", toStr(GCSettings.PreviewImage));
 	createXMLSetting("HideSRAMSaving", "Hide SRAM Saving", toStr(GCSettings.HideSRAMSaving));
 	
@@ -371,11 +371,9 @@ decodePrefsData ()
 			loadXMLSetting(&GCSettings.MusicVolume, "MusicVolume");
 			loadXMLSetting(&GCSettings.SFXVolume, "SFXVolume");
 			loadXMLSetting(&GCSettings.Rumble, "Rumble");
-			
-			int language = GCSettings.Language();
-			loadXMLSetting(&language, "language");
-			GCSettings.SetLanguage(language);
-
+#ifdef MULTI_LANGUAGES_SUPPORT
+			loadXMLSetting(&GCSettings.language, "language");
+#endif
 			loadXMLSetting(&GCSettings.PreviewImage, "PreviewImage");
 			loadXMLSetting(&GCSettings.HideSRAMSaving, "HideSRAMSaving");
 
@@ -426,6 +424,8 @@ void FixInvalidSettings()
 		GCSettings.MusicVolume = 20;
 	if(!(GCSettings.SFXVolume >= 0 && GCSettings.SFXVolume <= 100))
 		GCSettings.SFXVolume = 40;
+	if(GCSettings.language < 0 || GCSettings.language >= LANG_LENGTH)
+		GCSettings.language = LANG_ENGLISH;
 	if(GCSettings.Controller > CTRL_PAD4 || GCSettings.Controller < CTRL_SCOPE)
 		GCSettings.Controller = CTRL_PAD2;
 	if(!(GCSettings.render >= 0 && GCSettings.render < 5))
@@ -485,7 +485,16 @@ DefaultSettings ()
 	GCSettings.PreviewImage = 0;
 	GCSettings.HideSRAMSaving = 0;
 
-	GCSettings.SetLanguage(LANG_DEFAULT);
+#ifdef MULTI_LANGUAGES_SUPPORT
+#ifdef HW_RVL
+	GCSettings.language = CONF_GetLanguage();
+
+	if(GCSettings.language == LANG_TRAD_CHINESE)
+		GCSettings.language = LANG_SIMP_CHINESE;
+#else
+	GCSettings.language = SYS_GetLanguage() + LANG_ENGLISH;
+#endif
+#endif // #ifdef MULTI_LANGUAGES_SUPPORT
 
 	/****************** SNES9x Settings ***********************/
 
