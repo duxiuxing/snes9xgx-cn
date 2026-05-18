@@ -147,35 +147,17 @@ static void ResetText()
 static int currentLanguage = -1;
 
 void ChangeLanguage() {
-	if(currentLanguage == GCSettings.Language()) {
+	if(currentLanguage == GCSettings.language) {
 		return;
 	}
 
-	bool needLoadFont = false;
-	if (LANG_SIMP_CHINESE == LANG_DEFAULT
-		|| LANG_TRAD_CHINESE == LANG_DEFAULT
-		|| LANG_JAPANESE == LANG_DEFAULT
-		|| LANG_KOREAN == LANG_DEFAULT) {
-		if (GCSettings.Language() == LANG_DEFAULT)
-			needLoadFont = false;
-		else
-			needLoadFont = true;
-	}
-	else {
-		if (LANG_SIMP_CHINESE == GCSettings.Language()
-			|| LANG_TRAD_CHINESE == GCSettings.Language()
-			|| LANG_JAPANESE == GCSettings.Language()
-			|| LANG_KOREAN == GCSettings.Language())
-			needLoadFont = true;
-		else
-			needLoadFont = false;
-	}
-
-	if (needLoadFont) {
+#ifdef MULTI_LANGUAGES_SUPPORT
+	if(GCSettings.language == LANG_JAPANESE || GCSettings.language == LANG_KOREAN
+		|| GCSettings.language == LANG_SIMP_CHINESE || GCSettings.language == LANG_TRAD_CHINESE) {
 #ifdef HW_RVL
 		char filepath[MAXPATHLEN];
 
-		switch(GCSettings.Language()) {
+		switch(GCSettings.language) {
 			case LANG_KOREAN:
 				sprintf(filepath, "%s/ko.ttf", appPath);
 				break;
@@ -185,12 +167,9 @@ void ChangeLanguage() {
 			case LANG_SIMP_CHINESE:
 				sprintf(filepath, "%s/zh_cn.ttf", appPath);
 				break;
-			case LANG_TRAD_CHINESE:
-				sprintf(filepath, "%s/zh_hk.ttf", appPath);
-				break;
-			default:
-				sprintf(filepath, "%s/en.ttf", appPath);
-				break;
+//			case LANG_TRAD_CHINESE:
+//				sprintf(filepath, "%s/zh_hk.ttf", appPath);
+//				break;
 		}
 
 		size_t fontSize = LoadFont(filepath);
@@ -201,10 +180,10 @@ void ChangeLanguage() {
 			InitFreeType((u8*)ext_font_ttf, fontSize);
 		}
 		else {
-			GCSettings.SetLanguage(currentLanguage);
+			GCSettings.language = currentLanguage;
 		}
 #else
-	GCSettings.SetLanguage(currentLanguage);
+	GCSettings.language = currentLanguage;
 	ErrorPrompt("Unsupported language!");
 #endif
 	}
@@ -219,8 +198,10 @@ void ChangeLanguage() {
 		}
 	}
 #endif
+#endif // #ifdef MULTI_LANGUAGES_SUPPORT
+
 	ResetText();
-	currentLanguage = GCSettings.Language();
+	currentLanguage = GCSettings.language;
 }
 
 /****************************************************************************
@@ -868,43 +849,43 @@ static void WindowCredits(void * ptr)
 
 	GuiText::SetPresets(20, (GXColor){0, 0, 0, 255}, 0, FTGX_JUSTIFY_LEFT | FTGX_ALIGN_TOP, ALIGN_LEFT, ALIGN_TOP);
 	txt[i] = new GuiText("Coding & menu design");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("Tantric");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 	txt[i] = new GuiText("Additional improvements");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("Zopenko, michniewski");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 	txt[i] = new GuiText("InfiniteBlue, others");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 	txt[i] = new GuiText("Menu artwork");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("the3seashells");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 	txt[i] = new GuiText("Menu sound");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("Peter de Man");
-	txt[i]->SetPosition(335,y); i++; y+=48;
+	txt[i]->SetPosition(350,y); i++; y+=48;
 
 	txt[i] = new GuiText("Snes9x GX GameCube");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("SoftDev, crunchy2,");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 	txt[i] = new GuiText("eke-eke, others");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 	txt[i] = new GuiText("Snes9x");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("Snes9x Team");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 
 	txt[i] = new GuiText("libogc / devkitPPC");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("shagkur & WinterMute");
-	txt[i]->SetPosition(335,y); i++; y+=24;
+	txt[i]->SetPosition(350,y); i++; y+=24;
 	txt[i] = new GuiText("FreeTypeGX");
-	txt[i]->SetPosition(40,y); i++;
+	txt[i]->SetPosition(60,y); i++;
 	txt[i] = new GuiText("Armin Tamzarian");
-	txt[i]->SetPosition(335,y); i++;
+	txt[i]->SetPosition(350,y); i++;
 
 	char wiiDetails[30];
 	char wiiInfo[20];
@@ -4468,7 +4449,7 @@ static int MenuSettingsMenu()
 	int i = 0;
 	bool firstRun = true;
 	OptionList options;
-	currentLanguage = GCSettings.Language();
+	currentLanguage = GCSettings.language;
 
 	sprintf(options.name[i++], "Exit Action");
 	sprintf(options.name[i++], "Wiimote Orientation");
@@ -4558,13 +4539,17 @@ static int MenuSettingsMenu()
 				GCSettings.Rumble ^= 1;
 				break;
 			case 5:
-				{
-					int value = GCSettings.Language() + 1;
-					if (value >= LANG_LENGTH)
-						value = LANG_DEFAULT;
-					GCSettings.SetLanguage(value);
-					break;
-				}
+#ifdef MULTI_LANGUAGES_SUPPORT
+				GCSettings.language++;
+
+				if(GCSettings.language == LANG_TRAD_CHINESE) // skip (not supported)
+					GCSettings.language = LANG_KOREAN;
+				else if(GCSettings.language >= LANG_LENGTH)
+					GCSettings.language = LANG_JAPANESE;
+#elif defined(ZHCN_LANGUAGE_ONLY)
+				GCSettings.language == LANG_SIMP_CHINESE;
+#endif
+				break;
 			case 6:
 				GCSettings.PreviewImage++;
 				if(GCSettings.PreviewImage > 2)
@@ -4627,7 +4612,7 @@ static int MenuSettingsMenu()
 			else
 				sprintf (options.value[7], "Off");
 
-			switch(GCSettings.Language())
+			switch(GCSettings.language)
 			{
 				case LANG_JAPANESE:		sprintf(options.value[5], "Japanese"); break;
 				case LANG_ENGLISH:		sprintf(options.value[5], "English"); break;
@@ -4637,7 +4622,7 @@ static int MenuSettingsMenu()
 				case LANG_ITALIAN:		sprintf(options.value[5], "Italian"); break;
 				case LANG_DUTCH:		sprintf(options.value[5], "Dutch"); break;
 				case LANG_SIMP_CHINESE:	sprintf(options.value[5], "Chinese (Simplified)"); break;
-				case LANG_TRAD_CHINESE:	sprintf(options.value[5], "Chinese (Traditional)"); break;
+//				case LANG_TRAD_CHINESE:	sprintf(options.value[5], "Chinese (Traditional)"); break;
 				case LANG_KOREAN:		sprintf(options.value[5], "Korean"); break;
 				case LANG_PORTUGUESE:	sprintf(options.value[5], "Portuguese"); break;
 				case LANG_BRAZILIAN_PORTUGUESE: sprintf(options.value[5], "Brazilian Portuguese"); break;
@@ -4881,8 +4866,8 @@ MainMenu (int menu)
 
 		if(!SupportedIOS(ios))
 			ErrorPrompt("The current IOS is unsupported. Functionality and/or stability may be adversely affected.");
-		// else if(!SaneIOS(ios))
-		//	ErrorPrompt("The current IOS has been altered (fake-signed). Functionality and/or stability may be adversely affected.");
+		else if(!SaneIOS(ios))
+			ErrorPrompt("The current IOS has been altered (fake-signed). Functionality and/or stability may be adversely affected.");
 	}
 #endif
 
