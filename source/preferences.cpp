@@ -17,8 +17,10 @@
 #include <mxml.h>
 
 #include "snes9xgx.h"
+#include "system.h"
 #include "menu.h"
 #include "fileop.h"
+#include "videofilters.h"
 #include "video.h"
 #include "filebrowser.h"
 #include "input.h"
@@ -41,6 +43,10 @@ static mxml_node_t *elem = NULL;
 
 static char temp[200];
 
+static const char* BtoStr(bool b)
+{
+    return b ? "1" : "0";
+}
 static const char * toStr(int i)
 {
 	sprintf(temp, "%d", i);
@@ -129,7 +135,7 @@ preparePrefsData ()
 	createXMLSetting("LoadFolder", "Load Folder", GCSettings.LoadFolder);
 	createXMLSetting("LastFileLoaded", "Last File Loaded", GCSettings.LastFileLoaded);
 	createXMLSetting("SaveFolder", "Save Folder", GCSettings.SaveFolder);
-	createXMLSetting("AppendAuto", "Append Auto to .SAV Files", toStr(GCSettings.AppendAuto));
+	createXMLSetting("AppendAuto", "Append Auto to .SAV Files", BtoStr(GCSettings.AppendAuto));
 	createXMLSetting("CheatFolder", "Cheats Folder", GCSettings.CheatFolder);
 	createXMLSetting("ScreenshotsFolder", "Screenshots Folder", GCSettings.ScreenshotsFolder);
 	createXMLSetting("CoverFolder", "Covers Folder", GCSettings.CoverFolder);
@@ -148,21 +154,21 @@ preparePrefsData ()
 	createXMLSetting("zoomHor", "Horizontal Zoom Level", FtoStr(GCSettings.zoomHor));
 	createXMLSetting("zoomVert", "Vertical Zoom Level", FtoStr(GCSettings.zoomVert));
 	createXMLSetting("render", "Video Filtering", toStr(GCSettings.render));
-	createXMLSetting("widescreen", "Aspect Ratio Correction", toStr(GCSettings.widescreen));
-	createXMLSetting("crosshair", "Crosshair", toStr(GCSettings.crosshair));
+	createXMLSetting("widescreen", "Aspect Ratio Correction", BtoStr(GCSettings.widescreen));
+	createXMLSetting("crosshair", "Crosshair", BtoStr(GCSettings.crosshair));
 	createXMLSetting("FilterMethod", "Filter Method", toStr(GCSettings.FilterMethod));
-	createXMLSetting("HiResolution", "SNES Hi-Res Mode", toStr(GCSettings.HiResolution));
-	createXMLSetting("SpriteLimit", "Sprites per-line Limit", toStr(GCSettings.SpriteLimit));
-	createXMLSetting("FrameSkip", "Frame Skipping", toStr(GCSettings.FrameSkip));
+	createXMLSetting("HiResolution", "SNES Hi-Res Mode", BtoStr(GCSettings.HiResolution));
+	createXMLSetting("SpriteLimit", "Sprites per-line Limit", BtoStr(GCSettings.SpriteLimit));
+	createXMLSetting("FrameSkip", "Frame Skipping", BtoStr(GCSettings.FrameSkip));
 	createXMLSetting("xshift", "Horizontal Video Shift", toStr(GCSettings.xshift));
 	createXMLSetting("yshift", "Vertical Video Shift", toStr(GCSettings.yshift));
 	createXMLSetting("sfxOverclock", "SuperFX Overclock", toStr(GCSettings.sfxOverclock));
 	createXMLSetting("Interpolation", "Interpolation", toStr(GCSettings.Interpolation));
-	createXMLSetting("MuteAudio", "Mute", toStr(GCSettings.MuteAudio));
-	createXMLSetting("TurboModeEnabled", "Turbo Mode Enabled", toStr(GCSettings.TurboModeEnabled));
+	createXMLSetting("MuteAudio", "Mute", BtoStr(GCSettings.MuteAudio));
+	createXMLSetting("TurboModeEnabled", "Turbo Mode Enabled", BtoStr(GCSettings.TurboModeEnabled));
 	createXMLSetting("TurboModeButton", "Turbo Mode Button", toStr(GCSettings.TurboModeButton));
 	createXMLSetting("GamepadMenuToggle", "Gamepad Menu Toggle", toStr(GCSettings.GamepadMenuToggle));
-	createXMLSetting("MapABXYRightStick", "Map ABXY Right Stick", toStr(GCSettings.MapABXYRightStick));
+	createXMLSetting("MapABXYRightStick", "Map ABXY Right Stick", BtoStr(GCSettings.MapABXYRightStick));
 
 	createXMLSection("Menu", "Menu Settings");
 
@@ -172,10 +178,10 @@ preparePrefsData ()
 	createXMLSetting("ExitAction", "Exit Action", toStr(GCSettings.ExitAction));
 	createXMLSetting("MusicVolume", "Music Volume", toStr(GCSettings.MusicVolume));
 	createXMLSetting("SFXVolume", "Sound Effects Volume", toStr(GCSettings.SFXVolume));
-	createXMLSetting("Rumble", "Rumble", toStr(GCSettings.Rumble));
+	createXMLSetting("Rumble", "Rumble", BtoStr(GCSettings.Rumble));
 	createXMLSetting("language", "Language", toStr(GCSettings.language));
 	createXMLSetting("PreviewImage", "Preview Image", toStr(GCSettings.PreviewImage));
-	createXMLSetting("HideSRAMSaving", "Hide SRAM Saving", toStr(GCSettings.HideSRAMSaving));
+	createXMLSetting("HideSRAMSaving", "Hide SRAM Saving", BtoStr(GCSettings.HideSRAMSaving));
 	
 	createXMLSection("Controller", "Controller Settings");
 
@@ -222,6 +228,20 @@ static void loadXMLSetting(char * var, const char * name, int maxsize)
 		const char * tmp = mxmlElementGetAttr(item, "value");
 		if(tmp)
 			snprintf(var, maxsize, "%s", tmp);
+	}
+}
+static void loadXMLSetting(bool * var, const char * name)
+{
+	item = mxmlFindElement(xml, xml, "setting", "name", name, MXML_DESCEND);
+	if(item)
+	{
+		const char * tmp = mxmlElementGetAttr(item, "value");
+		if(tmp) {
+			if (strcmp(tmp, "1") == 0 || strcasecmp(tmp, "true") == 0)
+				*var = true;
+			else
+				*var = false;
+		}
 	}
 }
 static void loadXMLSetting(int * var, const char * name)
@@ -371,9 +391,7 @@ decodePrefsData ()
 			loadXMLSetting(&GCSettings.MusicVolume, "MusicVolume");
 			loadXMLSetting(&GCSettings.SFXVolume, "SFXVolume");
 			loadXMLSetting(&GCSettings.Rumble, "Rumble");
-#ifdef MULTI_LANGUAGES_SUPPORT
 			loadXMLSetting(&GCSettings.language, "language");
-#endif
 			loadXMLSetting(&GCSettings.PreviewImage, "PreviewImage");
 			loadXMLSetting(&GCSettings.HideSRAMSaving, "HideSRAMSaving");
 
@@ -408,9 +426,9 @@ decodePrefsData ()
  ***************************************************************************/
 void FixInvalidSettings()
 {
-	if(GCSettings.LoadMethod > 8)
+	if(GCSettings.LoadMethod >= DEVICE_LENGTH)
 		GCSettings.LoadMethod = DEVICE_AUTO;
-	if(GCSettings.SaveMethod > 8)
+	if(GCSettings.SaveMethod >= DEVICE_LENGTH)
 		GCSettings.SaveMethod = DEVICE_AUTO;	
 	if(!(GCSettings.zoomHor > 0.5 && GCSettings.zoomHor < 1.5))
 		GCSettings.zoomHor = 1.0;
@@ -428,10 +446,12 @@ void FixInvalidSettings()
 		GCSettings.language = LANG_ENGLISH;
 	if(GCSettings.Controller > CTRL_PAD4 || GCSettings.Controller < CTRL_SCOPE)
 		GCSettings.Controller = CTRL_PAD2;
-	if(!(GCSettings.render >= 0 && GCSettings.render < 5))
-		GCSettings.render = 3;
-	if(!(GCSettings.videomode >= 0 && GCSettings.videomode < 6))
-		GCSettings.videomode = 0;
+	if(!(GCSettings.render >= RENDER_ORIGINAL && GCSettings.render < RENDER_LENGTH))
+		GCSettings.render = RENDER_FILTERED_SHARP;
+	if(!(GCSettings.videomode >= VIDEOMODE_AUTO && GCSettings.videomode < VIDEOMODE_LENGTH))
+		GCSettings.videomode = VIDEOMODE_AUTO;
+	if(!(GCSettings.FilterMethod >= FILTER_NONE && GCSettings.FilterMethod <= NUM_FILTERS))
+		GCSettings.FilterMethod = FILTER_NONE;
 }
 
 /****************************************************************************
@@ -454,38 +474,43 @@ DefaultSettings ()
 	sprintf (GCSettings.ScreenshotsFolder, "%s/%s", APPFOLDER, loadFolder[LOADFOLDER_SCREENSHOTS].name); // Path to screenshots files
 	sprintf (GCSettings.CoverFolder, "%s/%s", APPFOLDER, loadFolder[LOADFOLDER_COVERS].name); // Path to cover files
 	sprintf (GCSettings.ArtworkFolder, "%s/%s", APPFOLDER, loadFolder[LOADFOLDER_ARTWORK].name); // Path to artwork files
-	GCSettings.AutoLoad = 1;
-	GCSettings.AutoSave = 1;
+	GCSettings.AutoLoad = true;
+	GCSettings.AutoSave = true;
 
 	GCSettings.Controller = CTRL_PAD2;
 
-	GCSettings.videomode = 0; // automatic video mode detection
-	GCSettings.render = 3; // Filtered (sharp)
-	GCSettings.FilterMethod = FILTER_NONE;	// no hq2x
-
-	GCSettings.widescreen = 0;
+	GCSettings.videomode = VIDEOMODE_AUTO;
+	GCSettings.render = RENDER_FILTERED_SHARP;
+	GCSettings.FilterMethod = FILTER_NONE;
 
 #ifdef HW_RVL
 	if (CONF_GetAspectRatio() == CONF_ASPECT_16_9)
-		GCSettings.widescreen = 1;
+		GCSettings.widescreen = true;
+	else
+		GCSettings.widescreen = false;
+#else
+	GCSettings.widescreen = true;
 #endif
 
 	GCSettings.zoomHor = 1.0; // horizontal zoom level
 	GCSettings.zoomVert = 1.0; // vertical zoom level
 	GCSettings.xshift = 0; // horizontal video shift
 	GCSettings.yshift = 0; // vertical video shift
-	GCSettings.crosshair = 1;
+	GCSettings.crosshair = true;
 
-	GCSettings.WiimoteOrientation = 0;
-	GCSettings.ExitAction = 0;
-	GCSettings.AutoloadGame = 0;
+	GCSettings.WiimoteOrientation = WIIMOTE_ORIENTATION_VERTICAL;
+#ifdef HW_RVL
+	GCSettings.ExitAction = EXITACTION_WII_AUTO;
+#else
+	GCSettings.ExitAction = EXITACTION_GC_RETURN_TO_LOADER;
+#endif
+	GCSettings.AutoloadGame = false;
 	GCSettings.MusicVolume = 20;
 	GCSettings.SFXVolume = 40;
-	GCSettings.Rumble = 1;
-	GCSettings.PreviewImage = 0;
-	GCSettings.HideSRAMSaving = 0;
-
-#ifdef MULTI_LANGUAGES_SUPPORT
+	GCSettings.Rumble = true;
+	GCSettings.PreviewImage = PREVIEWIMAGE_COVER;
+	GCSettings.HideSRAMSaving = false;
+	
 #ifdef HW_RVL
 	GCSettings.language = CONF_GetLanguage();
 
@@ -494,7 +519,6 @@ DefaultSettings ()
 #else
 	GCSettings.language = SYS_GetLanguage() + LANG_ENGLISH;
 #endif
-#endif // #ifdef MULTI_LANGUAGES_SUPPORT
 
 	/****************** SNES9x Settings ***********************/
 
@@ -524,7 +548,7 @@ DefaultSettings ()
 	Settings.SoundInputRate = 31920;
 	Settings.DynamicRateControl = true;
 	Settings.SeparateEchoBuffer = false;
-	GCSettings.MuteAudio = 0;
+	GCSettings.MuteAudio = false;
 	GCSettings.Interpolation = 0;
 	Settings.InterpolationMethod = DSP_INTERPOLATION_GAUSSIAN;
 
@@ -537,9 +561,9 @@ DefaultSettings ()
 	Settings.InitialInfoStringTimeout = 200; // # frames to display messages for
 	Settings.DisplayFrameRate = false;
 	Settings.DisplayTime = false;
-	GCSettings.HiResolution = 1; // Enabled by default
-	GCSettings.SpriteLimit = 1; // Enabled by default
-	GCSettings.FrameSkip = 1; // Enabled by default
+	GCSettings.HiResolution = true; // Enabled by default
+	GCSettings.SpriteLimit = true; // Enabled by default
+	GCSettings.FrameSkip = true; // Enabled by default
 
 	// Frame timings in 50hz and 60hz cpu mode
 	Settings.FrameTimePAL = 20000;
@@ -555,10 +579,10 @@ DefaultSettings ()
 	Settings.OneSlowClockCycle = 8;
 	Settings.TwoClockCycles = 12;
 
-	GCSettings.TurboModeEnabled = 1; // Enabled by default
+	GCSettings.TurboModeEnabled = true; // Enabled by default
 	GCSettings.TurboModeButton = 0; // Default is Right Analog Stick (0)
-	GCSettings.GamepadMenuToggle = 0; // 0 = All options (default), 1 = C-Stick left, 2 = R+L+Start
-	GCSettings.MapABXYRightStick = 0; 
+	GCSettings.GamepadMenuToggle = GAMEPAD_MENU_TOGGLE_DEFAULT;
+	GCSettings.MapABXYRightStick = false;
 }
 
 /****************************************************************************
@@ -668,7 +692,6 @@ LoadPrefsFromMethod (char * path)
  * Checks sources consecutively until we find a preference file
  ***************************************************************************/
 static bool prefLoadAttempted = false;
-static bool prefFound = false;
 
 bool LoadPrefs()
 {
@@ -709,7 +732,7 @@ bool LoadPrefs()
 
 	FixInvalidSettings();
 
-	if(GCSettings.videomode > 0) {
+	if(GCSettings.videomode > VIDEOMODE_AUTO) {
 		ResetVideo_Menu();
 	}
 

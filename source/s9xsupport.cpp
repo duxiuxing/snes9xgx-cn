@@ -4,25 +4,19 @@
  * softdev July 2006
  * crunchy2 May 2007
  * Michniewski 2008
- * Tantric 2008-2023
+ * Tantric 2008-2026
  *
  * s9xsupport.cpp
  *
  * Snes9x support functions
  ***************************************************************************/
 
-#include <gccore.h>
-#include <ogcsys.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <ogc/lwp_watchdog.h>
 
-#include "snes9x/port.h"
 #include "snes9xgx.h"
 #include "video.h"
 #include "audio.h"
+#include "input.h"
 #include "snes9x/snes9x.h"
 #include "snes9x/memmap.h"
 #include "snes9x/display.h"
@@ -33,6 +27,53 @@
 
 static long long prev;
 static long long now;
+
+/****************************************************************************
+ * setFrameTimerMethod()
+ * change frametimer method depending on whether ROM is NTSC or PAL
+ ***************************************************************************/
+
+void setFrameTimerMethod()
+{
+	/*
+	Set frametimer method
+	(timerstyle: 0=NTSC vblank, 1=PAL int timer)
+	*/
+	if ( Settings.PAL ) {
+		if(vmode_60hz)
+			timerstyle = 1;
+		else
+			timerstyle = 0;
+	} else {
+		if(vmode_60hz)
+			timerstyle = 0;
+		else
+			timerstyle = 1;
+	}
+	return;
+}
+
+void InitializeSnes9x() {
+	S9xUnmapAllControls ();
+	SetDefaultButtonMap ();
+
+	// Allocate SNES Memory
+	if (!Memory.Init ())
+		ExitApp();
+
+	// Allocate APU
+	if (!S9xInitAPU ())
+		ExitApp();
+
+	S9xInitSound (64, 0); // Initialise Sound System
+
+	// Initialise Graphics
+	setGFX ();
+	if (!S9xGraphicsInit ())
+		ExitApp();
+
+	AllocGfxMem();
+}
 
 /*** Miscellaneous Functions ***/
 void S9xExit()
@@ -72,7 +113,6 @@ void S9xToggleSoundChannel(int c)
  ***************************************************************************/
 bool8 S9xOpenSoundDevice(void)
 {
-	InitAudio();
 	return TRUE;
 }
 
@@ -85,70 +125,81 @@ void S9xInitSync()
 
 /*** Synchronisation ***/
 
-void S9xSyncSpeed () {
-	uint32 skipFrms = Settings.SkipFrames;
+/*
+ * Decide whether to render or skip the current frame.
+ *
+ * behindSchedule is true when emulation is running behind the target rate and
+ * a frame may be dropped to catch up. Frames are only ever skipped up to the
+ * configured limit so that the display cannot stall indefinitely.
+ */
+static void S9xChooseFrameToRender(bool behindSchedule, int32 skipFrms)
+{
+	if (behindSchedule && (IPPU.SkippedFrames < skipFrms))
+	{
+		IPPU.SkippedFrames++;
+		IPPU.RenderThisFrame = FALSE;
+	}
+	else
+	{
+		IPPU.SkippedFrames = 0;
+		IPPU.RenderThisFrame = TRUE;
+	}
+}
 
-	if (Settings.TurboMode)
-		skipFrms = Settings.TurboSkipFrames;
+void S9xSyncSpeed () {
+	const int32 skipFrms = Settings.TurboMode
+		? (int32) Settings.TurboSkipFrames
+		: (int32) Settings.SkipFrames;
 
 	if (timerstyle == 0) /* use Wii vertical sync (VSYNC) with NTSC roms */
 	{
-		while (FrameTimer == 0)
-		{
-			usleep(50);
-		}
+		// Capture current VBlank ticks
+		// update_video() acts as our hardware VBlank throttle.
+		int32 pendingFrames = FrameTimer;
 
-		if (FrameTimer > skipFrms)
+		bool behindSchedule = (pendingFrames > 1);
+
+		if (pendingFrames > skipFrms)
+		{
 			FrameTimer = skipFrms;
+			pendingFrames = skipFrms;
+		}
 
-		if ((FrameTimer > 1) && (IPPU.SkippedFrames < skipFrms))
-		{
-			IPPU.SkippedFrames++;
-			IPPU.RenderThisFrame = FALSE;
-		}
-		else
-		{
-			IPPU.SkippedFrames = 0;
-			IPPU.RenderThisFrame = TRUE;
-		}
+		S9xChooseFrameToRender(behindSchedule, skipFrms);
+
+		// Only consume a VBlank if one actually occurred to prevent underflow.
+		// If pendingFrames == 0, we are perfectly pipelined (1 frame ahead).
+		if (!Settings.TurboMode && FrameTimer > 0)
+			FrameTimer--;
 	}
-	else /* use internal timer for PAL roms */
+	else /* use internal timer for PAL roms (or TV/ROM mismatches) */
 	{
-		unsigned int timediffallowed = Settings.TurboMode ? 0 : Settings.FrameTime;
+		const u32 timediffallowed = Settings.TurboMode ? 0 : Settings.FrameTime;
+
 		now = gettime();
 
-		if (diff_usec(prev, now) > timediffallowed)
+		if (diff_usec(prev, now) < timediffallowed)
 		{
-			/* Timer has already expired */
-			if (IPPU.SkippedFrames < skipFrms)
+			/*** Ahead - so hold up until the frame's time budget elapses ***/
+			do
 			{
-				IPPU.SkippedFrames++;
-				IPPU.RenderThisFrame = FALSE;
-			}
-			else
-			{
-				IPPU.SkippedFrames = 0;
-				IPPU.RenderThisFrame = TRUE;
-			}
+				if ((timediffallowed - diff_usec(prev, now)) > 50) {
+					usleep(50); // The GPU draws concurrently during this CPU sleep!
+				}
+				now = gettime();
+			} while (diff_usec(prev, now) < timediffallowed);
+
+			IPPU.RenderThisFrame = TRUE;
+			IPPU.SkippedFrames = 0;
 		}
 		else
 		{
-			/*** Ahead - so hold up ***/
-			while (diff_usec(prev, now) < timediffallowed)
-			{
-				now = gettime();
-				usleep(50);
-			}
-			IPPU.RenderThisFrame = TRUE;
-			IPPU.SkippedFrames = 0;
+			/* Timer has already expired - we are behind, so consider skipping. */
+			S9xChooseFrameToRender(true, skipFrms);
 		}
 
 		prev = now;
 	}
-
-	if (!Settings.TurboMode)
-		FrameTimer--;
-	return;
 }
 
 /*** Video / Display related functions ***/
@@ -176,16 +227,19 @@ void S9xHandlePortCommand(s9xcommand_t cmd, int16 data1, int16 data2)
 
 bool S9xPollButton(uint32 id, bool * pressed)
 {
+	ReportButtons();
 	return 0;
 }
 
 bool S9xPollAxis(uint32 id, int16 * value)
 {
+	ReportButtons();
 	return 0;
 }
 
 bool S9xPollPointer(uint32 id, int16 * x, int16 * y)
 {
+	ReportButtons();
 	return 0;
 }
 

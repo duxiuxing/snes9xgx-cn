@@ -16,11 +16,10 @@
 
 #include "utils/FreeTypeGX.h"
 #include "snes9x.h"
-#include "filter.h"
 #include "filelist.h"
 
 #define APPNAME 			"Snes9x GX"
-#define APPVERSION 			"4.5.8"
+#define APPVERSION 			"5.0.0"
 #define APPFOLDER 			"snes9xgx"
 #define PREF_FILE_NAME		"settings.xml"
 
@@ -41,6 +40,7 @@ enum {
 	DEVICE_SD_SLOTB,
 	DEVICE_SD_PORT2,
 	DEVICE_SD_GCLOADER,
+	DEVICE_LENGTH
 };
 
 enum {
@@ -76,9 +76,72 @@ const FolderDef loadFolder[] = {
 
 enum {
 	FILE_SRAM,
-	FILE_SNAPSHOT,
+	FILE_STATE,
 	FILE_ROM,
 	FILE_CHEAT
+};
+
+enum {
+	AUTOLOAD_OFF = 0,
+	AUTOLOAD_SRAM,
+	AUTOLOAD_STATE
+};
+
+enum {
+	AUTOSAVE_OFF = 0,
+	AUTOSAVE_SRAM,
+	AUTOSAVE_STATE,
+	AUTOSAVE_BOTH
+};
+
+enum {
+	PREVIEWIMAGE_SCREENSHOT = 0,
+	PREVIEWIMAGE_COVER,
+	PREVIEWIMAGE_ARTWORK,
+	PREVIEWIMAGE_LENGTH
+};
+
+enum {
+	RENDER_ORIGINAL = 0,
+	RENDER_FILTERED,
+	RENDER_UNFILTERED,
+	RENDER_FILTERED_SOFT,
+	RENDER_FILTERED_SHARP,
+	RENDER_LENGTH
+};
+
+enum {
+	VIDEOMODE_AUTO = 0,
+	VIDEOMODE_NTSC,
+	VIDEOMODE_PROGRESSIVE,
+	VIDEOMODE_PAL,
+	VIDEOMODE_PAL60,
+	VIDEOMODE_PROGRESSIVE_576P,
+	VIDEOMODE_LENGTH
+};
+
+enum {
+	SFXOVERCLOCK_OFF = 0,
+	SFXOVERCLOCK_20MHZ,
+	SFXOVERCLOCK_40MHZ,
+	SFXOVERCLOCK_60MHZ,
+	SFXOVERCLOCK_80MHZ,
+	SFXOVERCLOCK_100MHZ,
+	SFXOVERCLOCK_120MHZ,
+	SFXOVERCLOCK_LENGTH
+};
+
+enum {
+	WIIMOTE_ORIENTATION_VERTICAL = 0,
+	WIIMOTE_ORIENTATION_HORIZONTAL,
+	WIIMOTE_ORIENTATION_LENGTH
+};
+
+enum {
+	GAMEPAD_MENU_TOGGLE_DEFAULT = 0,
+	GAMEPAD_MENU_TOGGLE_HOME_RIGHTSTICK,
+	GAMEPAD_MENU_TOGGLE_LRSTART_12PLUS,
+	GAMEPAD_MENU_TOGGLE_LENGTH
 };
 
 enum
@@ -148,7 +211,7 @@ struct SGCSettings{
 	int		AutoSave;
 	int		LoadMethod; // For ROMS: Auto, SD, DVD, USB, Network (SMB)
 	int		SaveMethod; // For SRAM, Freeze, Prefs: Auto, SD, USB, SMB
-	int		AppendAuto; // 0 - no, 1 - yes
+	bool	AppendAuto;
 	char	LoadFolder[MAXPATHLEN]; 	// Path to game files
 	char	LastFileLoaded[MAXPATHLEN]; // Last file loaded filename
 	char	SaveFolder[MAXPATHLEN]; 	// Path to save files
@@ -156,8 +219,8 @@ struct SGCSettings{
 	char	ScreenshotsFolder[MAXPATHLEN]; // Path to screenshots files
 	char	CoverFolder[MAXPATHLEN]; 	// Path to cover files
 	char	ArtworkFolder[MAXPATHLEN]; 	// Path to artwork files
-	int		HideSRAMSaving;
-	int		AutoloadGame;
+	bool	HideSRAMSaving;
+	bool	AutoloadGame;
 
 	char	smbip[80];
 	char	smbuser[20];
@@ -170,50 +233,37 @@ struct SGCSettings{
 	int		render;		// 0 - original, 1 - filtered, 2 - unfiltered
 	int		FilterMethod; // convert to RenderFilter
 	int		Controller;
-	int		HiResolution;
-	int		SpriteLimit;
-	int		FrameSkip;
-	int		crosshair;
-	int		widescreen;	// 0 - 4:3 aspect, 1 - 16:9 aspect
+	bool	HiResolution;
+	bool	SpriteLimit;
+	bool	FrameSkip;
+	bool	crosshair;
+	bool	widescreen;	// 0 - 4:3 aspect, 1 - 16:9 aspect
 	int		xshift;	// video output shift
 	int		yshift;
 	int		WiimoteOrientation;
 	int		ExitAction;
 	int		MusicVolume;
 	int		SFXVolume;
-	int		Rumble;
+	bool	Rumble;
 	int		language;
 	int		PreviewImage;
 
 	int		sfxOverclock;
 	
 	int		Interpolation;
-	int		MuteAudio;
+	bool	MuteAudio;
 
-	int		TurboModeEnabled; // 0 - disabled, 1 - enabled
+	bool	TurboModeEnabled;
 	int		TurboModeButton;
 	int		GamepadMenuToggle;
-	int		MapABXYRightStick;
+	bool	MapABXYRightStick;
 };
 
 void ExitApp();
-void ShutdownWii();
-bool SupportedIOS(u32 ios);
-bool SaneIOS(u32 ios);
 extern struct SGCSettings GCSettings;
 extern int ScreenshotRequested;
 extern int ConfigRequested;
-extern int ShutdownRequested;
-extern int ExitRequested;
 extern char appPath[];
 extern FreeTypeGX *fontSystem[];
-extern bool isWiiVC;
-static inline bool IsWiiU(void)
-{
-	return ((*(vu16*)0xCD8005A0 == 0xCAFE) || isWiiVC);
-}
-static inline bool IsWiiUFastCPU(void)
-{
-	return ((*(vu16*)0xCD8005A0 == 0xCAFE) && ((*(vu32*)0xCD8005B0 & 0x20) == 0));
-}
+
 #endif

@@ -32,7 +32,7 @@ jobs:
         # cp fonts/en.ttf dist/Snes9xGX/apps/snes9xgx/
         cp fonts/jp.ttf dist/Snes9xGX/apps/snes9xgx/
         cp fonts/ko.ttf dist/Snes9xGX/apps/snes9xgx/
-        cp fonts/zh_cn.ttf dist/Snes9xGX/apps/snes9xgx/
+        cp fonts/zh_cn.ttf dist/Snes9xGX/apps/snes9xgx/zh.ttf
         # cp fonts/zh_hk.ttf dist/Snes9xGX/apps/snes9xgx/
         cp hbc/icon.png dist/Snes9xGX/apps/snes9xgx/
         cp hbc/meta.xml dist/Snes9xGX/apps/snes9xgx/
@@ -104,7 +104,7 @@ jobs:
         rm -r snes9xgx/roms/*
         rm -r snes9xgx/saves/*
         rm -r snes9xgx/screenshots/*
-        zip -r ../Snes9xGX-v4.5.8.world.zip *
+        zip -r ../Snes9xGX-v5.0.0.world.zip *
         # cd ../Snes9xGX-GameCube
         # zip -r ../Snes9xGX-GameCube.zip *
 
