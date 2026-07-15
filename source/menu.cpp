@@ -866,6 +866,8 @@ static void WindowCredits(void * ptr)
 	bool exit = false;
 	int i = 0;
 	int y = 20;
+	const int x1 = 40;
+	const int x2 = 335;
 
 	GuiWindow creditsWindow(screenwidth,screenheight);
 	GuiWindow creditsWindowBox(580,448);
