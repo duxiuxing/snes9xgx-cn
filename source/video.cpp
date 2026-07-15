@@ -17,12 +17,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <ogc/texconv.h>
+#include <ogc/cond.h>
 #include <ogc/machine/processor.h>
 
 #include "snes9xgx.h"
 #include "menu.h"
-#include "filter.h"
+#include "videofilters.h"
 #include "filelist.h"
 #include "audio.h"
 #include "gui/gui.h"
@@ -34,11 +34,17 @@
 extern void UpdatePlaybackRate(void);
 
 /*** Snes9x GFX Buffer ***/
+#define EXT_WIDTH (MAX_SNES_WIDTH + 4)
+#define EXT_PITCH (EXT_WIDTH * 2)
+#define EXT_HEIGHT (MAX_SNES_HEIGHT + 4)
+// Offset into buffer to allow a two pixel border around the whole rendered
+// SNES image. This is a speed up hack to allow some of the image processing
+// routines to access black pixel data outside the normal bounds of the buffer.
+#define EXT_OFFSET (EXT_PITCH * 2 + 2 * 2)
+
 #define SNES9XGFX_SIZE 		(EXT_PITCH*EXT_HEIGHT)
-#define FILTERMEM_SIZE 		(512*MAX_SNES_HEIGHT*4)
 
 static unsigned char * snes9xgfx = NULL;
-unsigned char * filtermem = NULL; // only want ((512*2) X (239*2))
 
 /*** 2D Video ***/
 static u32 *xfb[2] = { NULL, NULL }; // Double buffered
@@ -46,25 +52,30 @@ static int whichfb = 0; // Switch
 GXRModeObj *vmode = NULL; // Current video mode
 int screenheight = 480;
 int screenwidth = 640;
-static int oldRenderMode = -1; // set to GCSettings.render when changing (temporarily) to another mode
 int CheckVideo = 0; // for forcing video reset
+static int fscale = 1;
+
+#define MAX_FB_WIDTH 640
+#define MAX_FB_HEIGHT 576
 
 /*** GX ***/
 #define TEX_WIDTH 512
 #define TEX_HEIGHT 512
 #define TEXTUREMEM_SIZE 	TEX_WIDTH*(TEX_HEIGHT+8)*2
 static unsigned char texturemem[TEXTUREMEM_SIZE] ATTRIBUTE_ALIGN (32);
+static unsigned char scanline_tex_data[32] ATTRIBUTE_ALIGN (32);
 
 #define DEFAULT_FIFO_SIZE 256 * 1024
-static unsigned int copynow = GX_FALSE;
+static volatile unsigned int copynow = GX_FALSE;
 static unsigned char gp_fifo[DEFAULT_FIFO_SIZE] ATTRIBUTE_ALIGN (32);
 static GXTexObj texobj;
+static GXTexObj scanlineTexObj;
 static Mtx view;
+static Mtx modelView;
 static Mtx GXmodelView2D;
 static int vwidth, vheight, oldvwidth, oldvheight;
 
-u8 * gameScreenPng = NULL;
-int gameScreenPngSize = 0;
+GameScreenPng gameScreenPng;
 
 u32 FrameTimer = 0;
 
@@ -88,13 +99,13 @@ camera;
      This structure controls the size of the image on the screen.
 	 Think of the output as a -80 x 80 by -60 x 60 graph.
 ***/
-s16 square[] ATTRIBUTE_ALIGN (32) =
+static s16 square[] ATTRIBUTE_ALIGN (32) =
 {
   /*
    * X,   Y,  Z
    * Values set are for roughly 4:3 aspect
    */
-	-HASPECT,  VASPECT, 0,		// 0
+	-HASPECT,  VASPECT, 0,	// 0
 	 HASPECT,  VASPECT, 0,	// 1
 	 HASPECT, -VASPECT, 0,	// 2
 	-HASPECT, -VASPECT, 0	// 3
@@ -106,7 +117,6 @@ static camera cam = {
 	{0.0F, 0.5F, 0.0F},
 	{0.0F, 0.0F, -0.5F}
 };
-
 
 /*** Custom Video modes (used to emulate original console video modes) ***/
 
@@ -267,22 +277,36 @@ static GXRModeObj *tvmodes[4] = {
  * VideoThreading
  ***************************************************************************/
 static lwp_t vbthread = LWP_THREAD_NULL;
+static lwpq_t render_queue;          // Queue for the main thread to sleep on
+static lwpq_t vb_queue;              // Queue for the VSync thread to sleep on
+static volatile bool vb_done = true; // Tracks if the VSync thread has completed its wait
+static volatile bool vb_wait = false; // Tracks if the VSync thread should begin waiting
 
 /****************************************************************************
  * vbgetback
  *
  * This callback enables the emulator to keep running while waiting for a
- * vertical blank.
- *
- * Putting LWP to good use :)
+ * vertical blank
  ***************************************************************************/
-static void *
-vbgetback (void *arg)
+static void * vbgetback (void *arg)
 {
 	while (1)
 	{
-		VIDEO_WaitVSync ();	 /**< Wait for video vertical blank */
-		LWP_SuspendThread (vbthread);
+		u32 level;
+		_CPU_ISR_Disable(level);
+		while (!vb_wait)
+		{
+			LWP_ThreadSleep(vb_queue);     // Sleep safely until update_video kicks us off
+		}
+		vb_wait = false;
+		_CPU_ISR_Restore(level);
+
+		VIDEO_WaitVSync();                 // Wait for video vertical blank
+
+		_CPU_ISR_Disable(level);
+		vb_done = true;
+		LWP_ThreadSignal(render_queue);    // Instantly alert the main thread
+		_CPU_ISR_Restore(level);
 	}
 	return NULL;
 }
@@ -301,8 +325,76 @@ copy_to_xfb (u32 arg)
 		GX_CopyDisp (xfb[whichfb], GX_TRUE);
 		GX_Flush ();
 		copynow = GX_FALSE;
+		LWP_ThreadSignal(render_queue); // Wake up the main thread if it is waiting for the copy
 	}
 	++FrameTimer;
+}
+
+/****************************************************************************
+ * Scanline Support Functions
+ ***************************************************************************/
+
+static void InitScanlineTexture() {
+	// GX_TF_I8 represents one byte per pixel.
+	// We create an 8x4 tile: Rows 0 and 2 are white (0xFF), Rows 1 and 3 are dark (0xA0).
+	for (int y = 0; y < 4; y++) {
+		u8 intensity = (y % 2 == 0) ? 0xFF : 0xA0; // 0xA0 controls the scanline darkness
+		for (int x = 0; x < 8; x++) {
+			scanline_tex_data[y * 8 + x] = intensity;
+		}
+	}
+
+	// CRITICAL: Flush the CPU data cache. GX reads directly from main memory.
+	DCStoreRange(scanline_tex_data, 32);
+
+	// Initialize the texture object. Wrap modes MUST be GX_REPEAT to tile across the screen.
+	GX_InitTexObj(&scanlineTexObj, scanline_tex_data, 8, 4, GX_TF_I8, GX_REPEAT, GX_REPEAT, GX_FALSE);
+
+	// CRITICAL: Filter mode MUST be GX_NEAR. GX_LINEAR will blur the lines into a muddy gray.
+	GX_InitTexObjFilterMode(&scanlineTexObj, GX_NEAR, GX_NEAR);
+
+	// Load the scanline texture into MAP1
+	GX_LoadTexObj(&scanlineTexObj, GX_TEXMAP1);
+}
+
+static void SetupScanlineFilterTEV() {
+	GX_SetVtxAttrFmt (GX_VTXFMT0, GX_VA_TEX1, GX_TEX_ST, GX_F32, 0);
+
+	// Allow a second texture coordinate to be passed to the vertex stream
+	GX_SetVtxDesc(GX_VA_TEX1, GX_DIRECT);
+
+	// Enable two textures and two TEV stages
+	GX_SetNumTexGens(2);
+	GX_SetNumTevStages(2);
+	GX_SetNumChans(0);
+
+	// Configure Texture Coordinate Generation for both textures
+	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
+	GX_SetTexCoordGen(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX1, GX_IDENTITY);
+
+	// --- STAGE 0: Sample the Game Screen ---
+	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLORNULL);
+	GX_SetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+	GX_SetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+	// Configure Stage 0 Alpha path
+	GX_SetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+	GX_SetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+	// --- STAGE 1: Multiply by Scanlines ---
+	GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLORNULL);
+	// Formula: d + ((1.0 - c) * a + c * b)
+	// By setting: a=ZERO, b=CPREV, c=TEXC, d=ZERO -> (TEXC * CPREV)
+	GX_SetTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, GX_CC_TEXC, GX_CC_ZERO);
+	GX_SetTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+	// Configure Stage 1 Alpha path (Pass-through blend)
+	GX_SetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_APREV, GX_CA_TEXA, GX_CA_ZERO);
+	GX_SetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+}
+
+static bool should_apply_scanlines() {
+	return GCSettings.FilterMethod == FILTER_SCANLINES && vmode->efbHeight > 300;
 }
 
 /****************************************************************************
@@ -313,55 +405,103 @@ draw_init ()
 {
 	GX_ClearVtxDesc ();
 	GX_SetVtxDesc (GX_VA_POS, GX_INDEX8);
-	GX_SetVtxDesc (GX_VA_CLR0, GX_INDEX8);
 	GX_SetVtxDesc (GX_VA_TEX0, GX_DIRECT);
 
 	GX_SetVtxAttrFmt (GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_S16, 0);
-	GX_SetVtxAttrFmt (GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
 	GX_SetVtxAttrFmt (GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+
+	if(should_apply_scanlines()) {
+		SetupScanlineFilterTEV();
+	}
+	else {
+		GX_SetNumTexGens (1);
+		GX_SetNumTevStages (1);
+		GX_SetNumChans (0);
+
+		GX_SetTexCoordGen (GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
+
+		GX_SetTevOp (GX_TEVSTAGE0, GX_REPLACE);
+		GX_SetTevOrder (GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLORNULL);
+	}
 
 	GX_SetArray (GX_VA_POS, square, 3 * sizeof (s16));
 
-	GX_SetNumTexGens (1);
-	GX_SetNumChans (0);
-
-	GX_SetTexCoordGen (GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
-
-	GX_SetTevOp (GX_TEVSTAGE0, GX_REPLACE);
-	GX_SetTevOrder (GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLORNULL);
-
 	memset (&view, 0, sizeof (Mtx));
 	guLookAt(view, &cam.pos, &cam.up, &cam.view);
-	GX_LoadPosMtxImm (view, GX_PNMTX0);
+	
+	Mtx m;
+	guMtxTrans (m, 0, 0, -100);
+	guMtxConcat (view, m, modelView);
+
+	GX_LoadPosMtxImm (modelView, GX_PNMTX0);
 
 	GX_InvVtxCache ();	// update vertex cache
 }
 
 static inline void
-draw_vert (u8 pos, u8 c, f32 s, f32 t)
+draw_vert (u8 pos, f32 s, f32 t)
 {
 	GX_Position1x8 (pos);
-	GX_Color1x8 (c);
 	GX_TexCoord2f32 (s, t);
 }
 
 static inline void
-draw_square (Mtx v)
+draw_square ()
 {
-	Mtx m;			// model matrix.
-	Mtx mv;			// modelview matrix.
-
-	guMtxIdentity (m);
-	guMtxTransApply (m, m, 0, 0, -100);
-	guMtxConcat (v, m, mv);
-
-	GX_LoadPosMtxImm (mv, GX_PNMTX0);
+	GX_LoadPosMtxImm (modelView, GX_PNMTX0);
+	
 	GX_Begin (GX_QUADS, GX_VTXFMT0, 4);
-	draw_vert (0, 0, 0.0, 0.0);
-	draw_vert (1, 0, 1.0, 0.0);
-	draw_vert (2, 0, 1.0, 1.0);
-	draw_vert (3, 0, 0.0, 1.0);
+
+	int scanlines = should_apply_scanlines();
+
+	if(scanlines) {
+		// Calculate physical dimensions of the rendering quad in EFB pixels
+		// We use the static 'square' array which holds the final scaled/zoomed screen footprint
+		// square[3] and square[0] are the Right and Left X bounds
+		// square[1] and square[7] are the Top and Bottom Y bounds
+		f32 quad_width = (f32)(square[3] - square[0]);
+		f32 quad_height = (f32)(square[1] - square[7]);
+
+		// Map exactly 1 texel to 1 EFB physical TV pixel
+		// Our scanline texture is 8 pixels wide and 4 pixels high
+		f32 u_repeat = quad_width / 8.0f;
+		f32 v_repeat = quad_height / 4.0f;
+
+		// The "Half-Texel Offset" Epsilon.
+		// By shifting the UV start coordinates by exactly half a texel, we force the
+		// GPU sampler to hit the 'dead center' of the texture pixels (e.g. 0.5, 1.5, 2.5),
+		// preventing the moiré effect caused by floating-point edge-rounding.
+		// U: 1/8 texel = 0.125. Half of that = 0.0625f
+		// V: 1/4 texel = 0.25. Half of that = 0.125f
+		f32 u_off = 0.0625f;
+		f32 v_off = 0.125f;
+
+		draw_vert (0, 0.0f, 0.0f); // TEX0
+		GX_TexCoord2f32 (u_off, v_off); // TEX1
+
+		draw_vert (1, 1.0f, 0.0f); // TEX0
+		GX_TexCoord2f32 (u_repeat + u_off, v_off); // TEX1
+
+		draw_vert (2, 1.0f, 1.0f); // TEX0
+		GX_TexCoord2f32 (u_repeat + u_off, v_repeat + v_off); // TEX1
+
+		draw_vert (3, 0.0f, 1.0f); // TEX0
+		GX_TexCoord2f32 (u_off, v_repeat + v_off); // TEX1
+	}
+	else {
+		draw_vert (0, 0.0f, 0.0f);
+		draw_vert (1, 1.0f, 0.0f);
+		draw_vert (2, 1.0f, 1.0f);
+		draw_vert (3, 0.0f, 1.0f);
+	}
 	GX_End ();
+
+	if(scanlines) {
+		// force identity matrix to ensure texture mapping is pristine and devoid of stray scaling
+		Mtx texMtx;
+		guMtxIdentity(texMtx);
+		GX_LoadTexMtxImm(texMtx, GX_TEXMTX1, GX_MTX2x4);
+	}
 }
 
 /****************************************************************************
@@ -391,19 +531,19 @@ static GXRModeObj * FindVideoMode()
 	// choose the desired video mode
 	switch(GCSettings.videomode)
 	{
-		case 1: // NTSC (480i)
+		case VIDEOMODE_NTSC: // NTSC (480i)
 			mode = &TVNtsc480IntDf;
 			break;
-		case 2: // Progressive (480p)
+		case VIDEOMODE_PROGRESSIVE: // Progressive (480p)
 			mode = &TVNtsc480Prog;
 			break;
-		case 3: // PAL (50Hz)
+		case VIDEOMODE_PAL: // PAL (50Hz)
 			mode = &TVPal576IntDfScale;
 			break;
-		case 4: // PAL (60Hz)
+		case VIDEOMODE_PAL60: // PAL (60Hz)
 			mode = &TVEurgb60Hz480IntDf;
 			break;
-		case 5: // Progressive (576p)
+		case VIDEOMODE_PROGRESSIVE_576P: // Progressive (576p)
 			mode = &TVPal576ProgScale;
 			break;
 		default:
@@ -499,18 +639,51 @@ static GXRModeObj * FindVideoMode()
  ***************************************************************************/
 static void SetupVideoMode(GXRModeObj * mode)
 {
-	if(vmode == mode)
+	static u32 last_fbWidth = 0;
+
+	// Force a video reset and XFB clear if the width was dynamically mutated
+	if(vmode == mode && last_fbWidth == mode->fbWidth)
 		return;
+
+	// Detect if we are transitioning between Progressive and Interlaced
+	bool mode_switch = false;
+	if (vmode != NULL) {
+		bool was_progressive = (vmode->viTVMode & 3) == VI_NON_INTERLACE || (vmode->viTVMode & 3) == VI_PROGRESSIVE;
+		bool is_progressive = (mode->viTVMode & 3) == VI_NON_INTERLACE || (mode->viTVMode & 3) == VI_PROGRESSIVE;
+		if (was_progressive != is_progressive) {
+			mode_switch = true;
+		}
+	}
+
+	last_fbWidth = mode->fbWidth;
 
 	VIDEO_SetPostRetraceCallback (NULL);
 	copynow = GX_FALSE;
 	VIDEO_Configure (mode);
 	VIDEO_Flush();
 
-	// Clear framebuffers etc.
-	VIDEO_ClearFrameBuffer (mode, xfb[0], COLOR_BLACK);
-	VIDEO_ClearFrameBuffer (mode, xfb[1], COLOR_BLACK);
+	// Clear framebuffers
+	// Force clear the maximum allocated size (640*576*2 bytes) to YUYV Black
+	// Prevents out-of-phase pink flashes when shrinking to RENDER_ORIGINAL
+	u32 max_xfb_words = (MAX_FB_WIDTH * MAX_FB_HEIGHT * 2) / 4;
+	for(u32 i = 0; i < max_xfb_words; i++) {
+		xfb[0][i] = COLOR_BLACK;
+		xfb[1][i] = COLOR_BLACK;
+	}
+
+	// Flush the CPU data cache so the VI immediately sees the cleared memory
+	DCFlushRange(xfb[0], MAX_FB_WIDTH * MAX_FB_HEIGHT * 2);
+	DCFlushRange(xfb[1], MAX_FB_WIDTH * MAX_FB_HEIGHT * 2);
+
 	VIDEO_SetNextFramebuffer (xfb[0]);
+
+	// If the hardware sync is changing, hold the black screen for one extra frame
+	// to allow the TV DAC to lock before un-blanking.
+	if (mode_switch) {
+		VIDEO_SetBlack(true);
+		VIDEO_Flush();
+		VIDEO_WaitForFlush();
+	}
 
 	VIDEO_SetBlack (false);
 	VIDEO_Flush ();
@@ -521,21 +694,20 @@ static void SetupVideoMode(GXRModeObj * mode)
 }
 
 /****************************************************************************
- * InitGCVideo
+ * InitVideo
  *
  * This function MUST be called at startup.
  * - also sets up menu video mode
  ***************************************************************************/
-void
-InitGCVideo ()
+void InitVideo ()
 {
 	VIDEO_Init();
 
 	// Allocate the video buffers
-	xfb[0] = (u32 *) memalign(32, 640*576*2);
-	xfb[1] = (u32 *) memalign(32, 640*576*2);
-	DCInvalidateRange(xfb[0], 640*576*2);
-	DCInvalidateRange(xfb[1], 640*576*2);
+	xfb[0] = (u32 *) memalign(32, MAX_FB_WIDTH*MAX_FB_HEIGHT*2);
+	xfb[1] = (u32 *) memalign(32, MAX_FB_WIDTH*MAX_FB_HEIGHT*2);
+	DCInvalidateRange(xfb[0], MAX_FB_WIDTH*MAX_FB_HEIGHT*2);
+	DCInvalidateRange(xfb[1], MAX_FB_WIDTH*MAX_FB_HEIGHT*2);
 	xfb[0] = (u32 *) MEM_K0_TO_K1 (xfb[0]);
 	xfb[1] = (u32 *) MEM_K0_TO_K1 (xfb[1]);
 
@@ -549,10 +721,11 @@ if (CONF_GetAspectRatio() == CONF_ASPECT_16_9 && (*(u32*)(0xCD8005A0) >> 16) == 
 #endif
 
 	SetupVideoMode(rmode);
-#ifdef HW_RVL
-	InitLUTs();	// init LUTs for hq2x
-	SetupFormat();   // For 2xBR
-#endif
+
+	// Setup synchronization queues
+	LWP_InitQueue(&render_queue);
+	LWP_InitQueue(&vb_queue);
+	vb_done = true;
 	LWP_CreateThread (&vbthread, vbgetback, NULL, NULL, 0, 68);
 	
 	// Initialize GX
@@ -567,7 +740,7 @@ if (CONF_GetAspectRatio() == CONF_ASPECT_16_9 && (*(u32*)(0xCD8005A0) >> 16) == 
 	vheight = 100;
 }
 
-void ResetFbWidth(int width, GXRModeObj *rmode)
+static void ResetFbWidth(int width, GXRModeObj *rmode)
 {
 	if(rmode->fbWidth == width)
 		return;
@@ -595,8 +768,7 @@ ResetVideo_Emu ()
 	Mtx44 p;
 	int i = -1;
 
-	// original render mode or hq2x
-	if (GCSettings.render == 0)
+	if (GCSettings.render == RENDER_ORIGINAL)
 	{
 		for (int j=0; j<4; j++)
 		{
@@ -612,8 +784,8 @@ ResetVideo_Emu ()
 	{
 		rmode = tvmodes[i];
 
-		// hack to fix video output for hq2x (only when actually filtering; h<=239, w<=256)
-		if (GCSettings.FilterMethod != FILTER_NONE && vheight <= 239 && vwidth <= 256)
+		// fix original video output for 2X filters (only when actually filtering; h<=239, w<=256)
+		if (fscale > 1 && vheight <= 239 && vwidth <= 256)
 		{
 			memcpy(&TV_Custom, tvmodes[i], sizeof(TV_Custom));
 			rmode = &TV_Custom;
@@ -622,7 +794,14 @@ ResetVideo_Emu ()
 			rmode->efbHeight *= 2;
 			rmode->xfbHeight *= 2;
 			rmode->xfbMode = VI_XFBMODE_DF;
-			rmode->viTVMode |= VI_INTERLACE;
+			rmode->viTVMode = VI_TVMODE(rmode->viTVMode >> 2, VI_INTERLACE);
+
+			// Calculate and enforce hardware Y-origin centering
+			int tvFormat = rmode->viTVMode >> 2;
+			int maxPhysicalHeight = (tvFormat == VI_PAL) ? 576 : 480;
+
+			// Center the hardware output based on the physical screen height
+			rmode->viYOrigin = (maxPhysicalHeight - rmode->viHeight) / 2;
 		}
 
 		if (Settings.PAL == 1)
@@ -656,8 +835,8 @@ ResetVideo_Emu ()
 	u8 sharp[7] = {0,0,21,22,21,0,0};
 	u8 soft[7] = {8,8,10,12,10,8,8};
 	u8* vfilter =
-		GCSettings.render == 3 ? sharp
-		: GCSettings.render == 4 ? soft
+		GCSettings.render == RENDER_FILTERED_SHARP ? sharp
+		: GCSettings.render == RENDER_FILTERED_SOFT ? soft
 		: rmode->vfilter;
 	GX_SetCopyFilter(rmode->aa, rmode->sample_pattern, (rmode->xfbMode == VI_XFBMODE_SF) ? GX_FALSE : GX_TRUE, vfilter);
 
@@ -670,6 +849,7 @@ ResetVideo_Emu ()
 
 	GX_SetZMode (GX_TRUE, GX_LEQUAL, GX_TRUE);
 	GX_SetColorUpdate (GX_TRUE);
+	GX_SetBlendMode (GX_BM_NONE, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
 
 	guOrtho(p, rmode->efbHeight/2, -(rmode->efbHeight/2), -(rmode->fbWidth/2), rmode->fbWidth/2, 100, 1000);	// matrix, t, b, l, r, n, f
 	GX_LoadProjectionMtx (p, GX_ORTHOGRAPHIC);
@@ -677,57 +857,138 @@ ResetVideo_Emu ()
 	draw_init ();
 }
 
-/****************************************************************************
- * MakeTexture
- *
- * Modified for a buffer with an offset (border)
- ***************************************************************************/
-void
-MakeTexture (const void *src, void *dst, s32 width, s32 height)
+void ClearScreenshot()
 {
-	u32 tmp0=0,tmp1=0,tmp2=0,tmp3=0;
+	if(gameScreenPng.buffer) {
+		free(gameScreenPng.buffer);
+		gameScreenPng.buffer = NULL;
+	}
 
-	__asm__ __volatile__ (
-		"	srwi		%6,%6,2\n"
-		"	srwi		%7,%7,2\n"
-		"	subi		%3,%4,4\n"
-		"	mr			%4,%3\n"
-		"	subi		%4,%4,4\n"
+	gameScreenPng.size = 0;
+}
 
-		"2: mtctr		%6\n"
-		"	mr			%0,%5\n"
-		//
-		"1: lwz			%1,0(%5)\n"			//1
-		"	stwu		%1,8(%4)\n"
-		"	lwz			%2,4(%5)\n"			//1
-		"	stwu		%2,8(%3)\n"
-		"	lwz			%1,1032(%5)\n"		//2
-		"	stwu		%1,8(%4)\n"
-		"	lwz			%2,1036(%5)\n"		//2
-		"	stwu		%2,8(%3)\n"
-		"	lwz			%1,2064(%5)\n"		//3
-		"	stwu		%1,8(%4)\n"
-		"	lwz			%2,2068(%5)\n"		//3
-		"	stwu		%2,8(%3)\n"
-		"	lwz			%1,3096(%5)\n"		//4
-		"	stwu		%1,8(%4)\n"
-		"	lwz			%2,3100(%5)\n"		//4
-		"	stwu		%2,8(%3)\n"
-		"	addi		%5,%5,8\n"
-		"	bdnz		1b\n"
-		"	addi		%5,%0,4128\n"		//5
-		"	subic.		%7,%7,1\n"
-		"	bne			2b"
-		//		0			 1			  2			   3		   4		  5		    6		    7
-		: "=&b"(tmp0), "=&b"(tmp1), "=&b"(tmp2), "=&b"(tmp3), "+b"(dst) : "b"(src), "b"(width), "b"(height)
-	);
+/****************************************************************************
+ * TakeScreenshot
+ *
+ * Copies the current texturemem screen into a PNG
+ ***************************************************************************/
+static void TakeScreenshot()
+{
+	IMGCTX pngContext = PNGU_SelectImageFromBuffer(savebuffer);
+
+	if (pngContext == NULL) {
+		return;
+	}
+
+	int res = PNGU_EncodeFromGXTexture(pngContext, gameScreenPng.width, gameScreenPng.height, texturemem, gameScreenPng.width * 3);
+
+	if(res == PNGU_OK) {
+		gameScreenPng.size = pngContext->cursor;
+	} else {
+		gameScreenPng.size = 0;
+	}
+
+	PNGU_ReleaseImageContext(pngContext);
+
+	if (gameScreenPng.size == 0) {
+		return;
+	}
+
+	gameScreenPng.buffer = (u8 *) malloc(gameScreenPng.size);
+	if (gameScreenPng.buffer == NULL) {
+		gameScreenPng.size = 0;
+		return;
+	}
+	memcpy(gameScreenPng.buffer, savebuffer, gameScreenPng.size);
+}
+
+/****************************************************************************
+ * MakeTexturePitch1032
+
+ * High-performance texture swizzling (Linear to 4x4 Tiled)
+ * Specifically optimized for 1032-byte stride (SNES buffer padding)
+ * - Eliminates pipeline stalls via interleaved load/store sequences
+ * - Utilizes dcbz (Data Cache Block Zero) to bypass read-allocate memory penalty
+ * - Avoids stwu pointer-update instructions to enable out-of-order execution
+ * - Maximizes GPR utilization for sustained Instruction Level Parallelism
+ * COMPATIBILITY:
+ * - Optimized for Snes9x internal video buffers (1032-byte pitch)
+ * - Requires width and height divisible by 4
+ * - Assumes 16-bit RGB565 format (2 bytes per pixel)
+ * ASSUMPTIONS:
+ * - Source pointer is aligned to 4-byte boundary
+ * - Destination pointer is aligned to 32-byte boundary
+ ***************************************************************************/
+
+void MakeTexturePitch1032(const void *src, void *dst, s32 width, s32 height)
+{
+    // Request dedicated registers from GCC to allow superscalar interleaving
+    u32 r_src_row=0, tmpA=0, tmpB=0, tmpC=0, tmpD=0;
+
+    __asm__ __volatile__ (
+        "srwi   %[width], %[width], 2\n"       // num_tiles_x = width / 4
+        "srwi   %[height], %[height], 2\n"     // num_tiles_y = height / 4
+
+    "2: mtctr   %[width]\n"                    // Set inner loop counter (X)
+        "mr     %[r_src_row], %[src]\n"        // Save the start of the current source row
+
+    "1: dcbz    0, %[dst]\n"                   // ZERO L1 CACHE: Skips read-from-RAM penalty
+
+        // -- Load Tile Half 1 (Rows 0 & 1) --
+        "lwz    %[tmpA], 0(%[src])\n"
+        "lwz    %[tmpB], 4(%[src])\n"
+        "lwz    %[tmpC], 1032(%[src])\n"
+        "lwz    %[tmpD], 1036(%[src])\n"
+
+        // -- Store Half 1 while Loading Tile Half 2 (Rows 2 & 3) --
+        // By interleaving here, we completely hide the memory load latency!
+        "stw    %[tmpA], 0(%[dst])\n"
+        "lwz    %[tmpA], 2064(%[src])\n"
+
+        "stw    %[tmpB], 4(%[dst])\n"
+        "lwz    %[tmpB], 2068(%[src])\n"
+
+        "stw    %[tmpC], 8(%[dst])\n"
+        "lwz    %[tmpC], 3096(%[src])\n"
+
+        "stw    %[tmpD], 12(%[dst])\n"
+        "lwz    %[tmpD], 3100(%[src])\n"
+
+        // -- Store Half 2 --
+        "stw    %[tmpA], 16(%[dst])\n"
+        "stw    %[tmpB], 20(%[dst])\n"
+        "stw    %[tmpC], 24(%[dst])\n"
+        "stw    %[tmpD], 28(%[dst])\n"
+
+        // -- Advance Pointers --
+        "addi   %[src], %[src], 8\n"           // Advance X by 2 pixels (8 bytes)
+        "addi   %[dst], %[dst], 32\n"          // Advance dst by 1 full tile
+        "bdnz   1b\n"                          // Decrement CTR, loop if > 0
+
+        // -- Next Tile Row --
+        "addi   %[src], %[r_src_row], 4128\n"  // Jump 4 rows down (1032 * 4)
+        "subic. %[height], %[height], 1\n"     // Decrement height counter
+        "bne    2b"                            // Loop Y
+
+        // Constraints mapping
+        : [r_src_row] "=&b" (r_src_row),
+          [tmpA] "=&r" (tmpA),
+          [tmpB] "=&r" (tmpB),
+          [tmpC] "=&r" (tmpC),
+          [tmpD] "=&r" (tmpD),
+          [dst] "+b" (dst),
+          [src] "+b" (src),
+          [width] "+r" (width),
+          [height] "+r" (height)
+        : // No input-only operands
+        : "memory"
+    );
 }
 
 /****************************************************************************
  * Update Video
  ***************************************************************************/
 uint32 prevRenderedFrameCount = 0;
-int fscale = 1;
 
 void
 update_video (int width, int height)
@@ -738,59 +999,76 @@ update_video (int width, int height)
 	if(CheckVideo == 2 && IPPU.RenderedFramesCount == prevRenderedFrameCount)
 		return; // we haven't rendered any frames yet, so we can't draw anything!
 
-	// Ensure previous vb has complete
-	while ((LWP_ThreadIsSuspended (vbthread) == 0) || (copynow == GX_TRUE))
-		usleep (50);
+	// Wait for the VI to display the PREVIOUSLY submitted frame
+	// This naturally throttles the emulator to the TV's refresh rate
+	u32 level;
+
+	_CPU_ISR_Disable(level);
+	while (!vb_done || (copynow == GX_TRUE))
+	{
+		LWP_ThreadSleep(render_queue); // Halts main thread with 0 CPU load until signals occur
+	}
+	_CPU_ISR_Restore(level);
+
+	// Guarantee the GPU has fully finished rendering the previous frame
+	// before we begin swizzling new data into texturemem
+	GX_DrawDone();
 
 	whichfb ^= 1;
 
-	if (oldvheight != vheight || oldvwidth != vwidth)	// if rendered width/height changes, update scaling
+	if (oldvheight != vheight || oldvwidth != vwidth) // if rendered width/height changes, update scaling
 		CheckVideo = 1;
 
 	if (CheckVideo)	// if we get back from the menu, and have rendered at least 1 frame
 	{
 		int xscale, yscale;
-#ifdef HW_RVL
+
 		if(vwidth <= 256)
-			fscale = GetFilterScale((RenderFilter)GCSettings.FilterMethod);
+			fscale = GetFilterScale();
 		else
 			fscale = 1;
-#endif
+
 		ResetVideo_Emu ();	// reset video to emulator rendering settings
-#ifdef HW_RVL
-		memset(filtermem, 0, FILTERMEM_SIZE);
-#endif
+
 		/** Update scaling **/
-		if (GCSettings.render == 0)	// original render mode
+		if (GCSettings.render == RENDER_ORIGINAL)	// original render mode
 		{
-			if (GCSettings.FilterMethod != FILTER_NONE && vheight <= 239 && vwidth <= 256)
-			{	// filters; normal operation
+			if (fscale > 1)
+			{
 				xscale = vwidth;
 				yscale = vheight;
 			}
 			else
-			{	// no filtering
-				fscale = 1;
+			{
 				xscale = 256;
 				yscale = vheight / 2;
+			}
+
+			if (GCSettings.widescreen) {
+				xscale = (3*xscale)/4;
 			}
 		}
 		else // unfiltered and filtered mode
 		{
-			xscale = 256;
+			if (GCSettings.widescreen) {
+				// Determine the raw height of the SNES signal
+				float base_height = (vheight == 224 || vheight == 448) ? 224.0f : 239.0f;
 
-			if(vheight == 224 || vheight == 448)
-				yscale = 224;
-			else
-				yscale = 239;
-		}
+				// Calculate the uniform scale required to make the height fill the 480 screen
+				float scale_factor = (vmode->efbHeight / 2.0f) / base_height;
 
-		if (GCSettings.widescreen)
-		{
-			if(GCSettings.render == 0)
-				xscale = (3*xscale)/4;
-			else
-				xscale = 256; // match the original console's width for "widescreen" to prevent flickering
+				// Apply the exact same scale factor to both the width and the height
+				xscale = (256.0f * scale_factor * 15) / 16; // Mathematically perfect compensation for the 640 widescreen EFB
+				yscale = vmode->efbHeight / 2;
+			}
+			else {
+				xscale = 256;
+
+				if(vheight == 224 || vheight == 448)
+					yscale = 224;
+				else
+					yscale = 239;
+			}
 		}
 
 		xscale *= GCSettings.zoomHor;
@@ -800,79 +1078,104 @@ update_video (int width, int height)
 		square[0] = square[9]  = -xscale + GCSettings.xshift;
 		square[4] = square[1]  =  yscale - GCSettings.yshift;
 		square[7] = square[10] = -yscale - GCSettings.yshift;
+
 		DCFlushRange (square, 32); // update memory BEFORE the GPU accesses it!
+
+		GXRModeObj *menu_vmode = FindVideoMode();
+
+		// 1. Compensate for progressive/interlaced physical line density
+		float viHeightAdjusted = (vmode->viHeight < 300) ? (vmode->viHeight * 2.0f) : (float)vmode->viHeight;
+		float menuViHeightAdjusted = (menu_vmode->viHeight < 300) ? (menu_vmode->viHeight * 2.0f) : (float)menu_vmode->viHeight;
+
+		// 2. Calculate physical fraction of the TV screen the hardware is utilizing
+		float physical_width_ratio = (float)vmode->viWidth / (float)menu_vmode->viWidth;
+		float physical_height_ratio = viHeightAdjusted / menuViHeightAdjusted;
+
+		// 3. Calculate fraction of the EFB utilized by the game quad
+		float width_frac  = (2.0f * xscale) / (float)vmode->fbWidth;
+		float height_frac = (2.0f * yscale) / (float)vmode->efbHeight;
+
+		// 4. Map completely into the Menu's 640x480 logical canvas
+		float targetWidth  = screenwidth * width_frac * physical_width_ratio;
+		float targetHeight = screenheight * height_frac * physical_height_ratio;
+
+		gameScreenPng.width  = vwidth * fscale;
+		gameScreenPng.height = vheight * fscale;
+
+		gameScreenPng.scaleX = targetWidth / (float)gameScreenPng.width;
+		gameScreenPng.scaleY = targetHeight / (float)gameScreenPng.height;
+
+		// 5. Shift calculations must map EFB distances physically through to the Menu canvas
+		gameScreenPng.xoffset = GCSettings.xshift * (screenwidth / (float)menu_vmode->viWidth) * ((float)vmode->viWidth / (float)vmode->fbWidth);
+		gameScreenPng.yoffset = GCSettings.yshift * (screenheight / menuViHeightAdjusted) * (viHeightAdjusted / (float)vmode->efbHeight);
+
     	draw_init ();
 
 		// initialize the texture obj we are going to use
 		GX_InitTexObj (&texobj, texturemem, vwidth*fscale, vheight*fscale, GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
 
-	    if (GCSettings.render == 0 || GCSettings.render == 2)
+		if (GCSettings.render == RENDER_ORIGINAL || GCSettings.render == RENDER_UNFILTERED)
 			GX_InitTexObjFilterMode(&texobj,GX_NEAR,GX_NEAR); // original/unfiltered video mode: force texture filtering OFF
 
-		GX_LoadTexObj (&texobj, GX_TEXMAP0);	// load texture object so its ready to use
+		GX_LoadTexObj (&texobj, GX_TEXMAP0); // load texture object so its ready to use
+
+		if(should_apply_scanlines())
+			InitScanlineTexture();
 
 		oldvwidth = vwidth;
 		oldvheight = vheight;
 		CheckVideo = 0;
 	}
-#ifdef HW_RVL
+
 	// convert image to texture
-	if (GCSettings.FilterMethod != FILTER_NONE && vheight <= 239 && vwidth <= 256)	// don't do filtering on game textures > 256 x 239
+	if (fscale > 1 && vheight <= 239 && vwidth <= 256) // don't do filtering on game textures > 256 x 239
 	{
-		FilterMethod ((uint8*) GFX.Screen, EXT_PITCH, (uint8*) filtermem, vwidth*fscale*2, vwidth, vheight);
-		MakeTexture565((char *) filtermem, (char *) texturemem, vwidth*fscale, vheight*fscale);
+		FilterMethod ((uint8*) GFX.Screen, EXT_PITCH, (uint8*) texturemem, vwidth*fscale*2, vwidth, vheight);
 	}
 	else
-#endif
 	{
-		MakeTexture((char *) GFX.Screen, (char *) texturemem, vwidth, vheight);
+		MakeTexturePitch1032((char *) GFX.Screen, (char *) texturemem, vwidth, vheight);
 	}
+	
+	// Pad dimensions to 4x4 tile boundaries
+	u32 padded_width = (vwidth * fscale + 3) & ~3;
+	u32 padded_height = (vheight * fscale + 3) & ~3;
 
-	DCFlushRange (texturemem, TEXTUREMEM_SIZE);	// update the texture memory
+	// A 4x4 tile is 16 pixels * 2 bytes = 32 bytes
+	// Padded dimensions guarantee the result is naturally a multiple of 32
+	u32 flush_size = padded_width * padded_height * 2;
+
+	DCStoreRange(texturemem, flush_size); // update the texture memory
 	GX_InvalidateTexAll ();
 
-	draw_square (view);		// draw the quad
-
-	GX_DrawDone ();
+	draw_square ();		// draw the quad
 
 	if(ScreenshotRequested)
 	{
-		if(GCSettings.render == 0) // we can't take a screenshot in Original mode
-		{
-			oldRenderMode = 0;
-			GCSettings.render = 2; // switch to unfiltered mode
-			CheckVideo = 1; // request the switch
-		}
-		else
-		{
-			ScreenshotRequested = 0;
-			TakeScreenshot();
-			if(oldRenderMode != -1)
-			{
-				GCSettings.render = oldRenderMode;
-				oldRenderMode = -1;
-			}
-			ConfigRequested = 1;
-		}
+		// We MUST wait for the GPU to finish the CURRENT frame before
+		// reading from the EFB to encode the PNG
+		GX_DrawDone();
+		ScreenshotRequested = 0;
+		TakeScreenshot();
+		ConfigRequested = 1;
 	}
 
 	VIDEO_SetNextFramebuffer (xfb[whichfb]);
 	VIDEO_Flush ();
 	copynow = GX_TRUE;
 
-	// Return to caller, don't waste time waiting for vb
-	LWP_ResumeThread (vbthread);
+	// Reset state and signal background VSync thread to begin waiting for next blanking interval
+	_CPU_ISR_Disable(level);
+	vb_done = false;
+	vb_wait = true;
+	LWP_ThreadSignal(vb_queue);
+	_CPU_ISR_Restore(level);
 }
 
 void AllocGfxMem()
 {
 	snes9xgfx = (unsigned char *)memalign(32, SNES9XGFX_SIZE);
 	memset(snes9xgfx, 0, SNES9XGFX_SIZE);
-
-#ifdef HW_RVL
-	filtermem = (unsigned char *)memalign(32, FILTERMEM_SIZE);
-	memset(filtermem, 0, FILTERMEM_SIZE);
-#endif
 
 	GFX.Pitch = EXT_PITCH;
 	GFX.Screen = (uint16*)(snes9xgfx + EXT_OFFSET);
@@ -887,34 +1190,6 @@ void
 setGFX ()
 {
 	GFX.Pitch = EXT_PITCH;
-}
-
-/****************************************************************************
- * TakeScreenshot
- *
- * Copies the current screen into a GX texture
- ***************************************************************************/
-void TakeScreenshot()
-{
-	IMGCTX pngContext = PNGU_SelectImageFromBuffer(savebuffer);
-
-	if (pngContext != NULL)
-	{
-		gameScreenPngSize = PNGU_EncodeFromEFB(pngContext, vmode->fbWidth, vmode->efbHeight);
-		PNGU_ReleaseImageContext(pngContext);
-		gameScreenPng = (u8 *)malloc(gameScreenPngSize);
-		memcpy(gameScreenPng, savebuffer, gameScreenPngSize);
-	}
-}
-
-void ClearScreenshot()
-{
-	if(gameScreenPng)
-	{
-		gameScreenPngSize = 0;
-		free(gameScreenPng);
-		gameScreenPng = NULL;
-	}
 }
 
 /****************************************************************************
@@ -966,6 +1241,7 @@ ResetVideo_Menu ()
 
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
+	GX_SetNumTevStages(1);
 	GX_SetTevOp (GX_TEVSTAGE0, GX_PASSCLR);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
@@ -1023,8 +1299,7 @@ void Menu_DrawImg(f32 xpos, f32 ypos, u16 width, u16 height, u8 data[],
 	width  >>= 1;
 	height >>= 1;
 
-	guMtxIdentity (m1);
-	guMtxScaleApply(m1,m1,scaleX,scaleY,1.0);
+	guMtxScale(m1, scaleX, scaleY, 1.0);
 	guVector axis = (guVector) {0 , 0, 1 };
 	guMtxRotAxisDeg (m2, &axis, degrees);
 	guMtxConcat(m2,m1,m);
@@ -1083,4 +1358,3 @@ void Menu_DrawRectangle(f32 x, f32 y, f32 width, f32 height, GXColor color, u8 f
 	}
 	GX_End();
 }
-

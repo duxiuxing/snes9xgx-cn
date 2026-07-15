@@ -29,18 +29,25 @@ INCLUDES	:=	source source/snes9x
 # options for code generation
 #---------------------------------------------------------------------------------
 
+# -fno-strict-aliasing to prevent GCC 16 from breaking legacy type-punning.
+# -ffast-math to speed up APU/DSP floating point operations.
 CFLAGS	= -g -O3 -Wall $(MACHDEP) $(INCLUDE) $(FREETYPE_CFLAGS) \
 				-DHAVE_STDINT_H -DBLARGG_NONPORTABLE -DBLARGG_BIG_ENDIAN -DBLARGG_CPU_POWERPC \
 				-DZLIB -DRIGHTSHIFT_IS_SAR -DCPU_SHUTDOWN -DCORRECT_VRAM_READS \
-				-D_SZ_ONE_DIRECTORY -D_LZMA_IN_CB -D_LZMA_OUT_READ -DZHCN_LANGUAGE_ONLY \
-				-fomit-frame-pointer \
-				-Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-strict-aliasing \
-				-Wno-format -Wno-format-overflow -Wno-stringop-truncation -Wno-stringop-overflow -Wno-format-truncation -Wno-narrowing -Wno-sign-compare \
+				-D_SZ_ONE_DIRECTORY -D_LZMA_IN_CB -D_LZMA_OUT_READ \
+				-DZH_LANG_ONLY \
+				-flto=auto \
+				-fomit-frame-pointer -fno-strict-aliasing \
+				-Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable \
+				-Wno-format -Wno-format-overflow -Wno-stringop-truncation \
+				-Wno-stringop-overflow -Wno-format-truncation -Wno-narrowing -Wno-sign-compare \
 				-Wno-unused-function -Wno-write-strings -Wno-parentheses -Wno-uninitialized -Wno-infinite-recursion
 
-CXXFLAGS	=	$(CFLAGS)
+# Isolated CXXFLAGS to strip out C++ runtime overhead (Exceptions/RTTI)
+# This saves instruction cache space, critical for the 750CL.
+CXXFLAGS	=	$(CFLAGS) -Wno-register -fno-exceptions -fno-rtti -fno-threadsafe-statics
 
-LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
+LDFLAGS	=	-g -O3 -flto=auto $(MACHDEP) -Wl,-Map,$(notdir $@).map
 LDFLAGS +=	-L../buildtools
 
 #---------------------------------------------------------------------------------
@@ -88,8 +95,8 @@ else
 endif
 
 export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
-export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(sFILES:.s=.o) $(SFILES:.S=.o)
-export OFILES := $(OFILES_BIN) $(OFILES_SOURCES)
+export OFILES_SOURCES := $(filter-out cpuops.o dma.o ppu.o tileimpl-n1x1.o tileimpl-n2x1.o tileimpl-h2x1.o, $(CPPFILES:.cpp=.o)) $(CFILES:.c=.o) $(sFILES:.s=.o) $(SFILES:.S=.o)
+export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) cpuops.o dma.o ppu.o tileimpl-n1x1.o tileimpl-n2x1.o tileimpl-h2x1.o
 
 export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES)))
 
@@ -167,6 +174,43 @@ $(OFILES_SOURCES) : $(HFILES)
 
 -include $(DEPENDS)
 
+#=================================================================================
+# HIGH-PERFORMANCE CUSTOM OVERRIDES FOR CRITICAL CORES
+# Forces -O2 and -fno-unroll-loops on files susceptible to I-Cache bloat,
+# ensuring control structures fit within the Wii's 32KB L1 Instruction Cache.
+# Note: Appending flags AFTER $(CXXFLAGS) ensures they override global -O3 profiles.
+#=================================================================================
+
+cpuops.o: cpuops.cpp
+	@mkdir -p $(dir $@)
+	@echo "Compiling cpuops.o with I-Cache optimized flags (-O2 -fno-unroll-loops)..."
+	$(CXX) -c $(CXXFLAGS) -O2 -fno-unroll-loops $< -o $@
+	
+dma.o: dma.cpp
+	@mkdir -p $(dir $@)
+	@echo "Compiling dma.o with I-Cache optimized flags (-O2 to mitigate scanline HDMA bloat)..."
+	$(CXX) -c $(CXXFLAGS) -O2 $< -o $@
+	
+ppu.o: ppu.cpp
+	@mkdir -p $(dir $@)
+	@echo "Compiling ppu.o with I-Cache optimized flags (-O2 to compress massive register switch blocks)..."
+	$(CXX) -c $(CXXFLAGS) -O2 $< -o $@
+
+tileimpl-n1x1.o: tileimpl-n1x1.cpp
+	@mkdir -p $(dir $@)
+	@echo "Compiling tileimpl-n1x1.o with I-Cache optimized flags (-O2 -fno-unroll-loops)..."
+	$(CXX) -c $(CXXFLAGS) -O2 -fno-unroll-loops $< -o $@
+
+tileimpl-n2x1.o: tileimpl-n2x1.cpp
+	@mkdir -p $(dir $@)
+	@echo "Compiling tileimpl-n2x1.o with I-Cache optimized flags (-O2 -fno-unroll-loops)..."
+	$(CXX) -c $(CXXFLAGS) -O2 -fno-unroll-loops $< -o $@
+
+tileimpl-h2x1.o: tileimpl-h2x1.cpp
+	@mkdir -p $(dir $@)
+	@echo "Compiling tileimpl-h2x1.o with I-Cache optimized flags (-O2 -fno-unroll-loops)..."
+	$(CXX) -c $(CXXFLAGS) -O2 -fno-unroll-loops $< -o $@
+	
 #---------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------
