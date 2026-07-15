@@ -193,6 +193,9 @@ msgstr "禁用"
 msgid "distributed, or modified under the terms of the"
 msgstr "在以下的条件下发布、修改"
 
+msgid "Dolphin Emulator"
+msgstr "海豚模拟器"
+
 msgid "Don't Save"
 msgstr "不保存"
 
@@ -329,10 +332,10 @@ msgid "Hide SRAM Saving"
 msgstr "隐藏电池存档"
 
 msgid "HOME"
-msgstr "HOME 键"
+msgstr "HOME键"
 
 msgid "Home / Right Stick"
-msgstr "HOME 键 / 右摇杆"
+msgstr "HOME键 / 右摇杆"
 
 msgid "Horizontal"
 msgstr "水平方向"
@@ -368,19 +371,19 @@ msgid "Invalid game file!"
 msgstr "无效的游戏文件！"
 
 msgid "Invalid network settings - Check settings.xml."
-msgstr "无效的网络设定 - 检查 settings.xml。"
+msgstr "无效的网络设置 - 请检查 settings.xml。"
 
 msgid "Invalid network settings - Share IP is blank."
-msgstr "无效的网络设定 - 共享 IP 为空。"
+msgstr "无效的网络设置 - 共享 IP 为空。"
 
 msgid "Invalid network settings - Share name is blank."
-msgstr "无效的网络设定 - 共享名为空。"
+msgstr "无效的网络设置 - 共享名为空。"
 
 msgid "Invalid save file"
-msgstr "无效的保存文件"
+msgstr "无效的存档文件"
 
 msgid "Invalid state file"
-msgstr "无效的状态文件"
+msgstr "无效的即时存档文件"
 
 msgid "Italian"
 msgstr "意大利语"
@@ -458,7 +461,7 @@ msgid "Map ABXY to Right Stick"
 msgstr "ABXY 键对应右摇杆"
 
 msgid "Maximum filepath length reached!"
-msgstr "文件路径长度达到最大！"
+msgstr "已达到文件路径的最大长度！"
 
 msgid "Mayflash: connected"
 msgstr "Mayflash 街机摇杆：已连接"
@@ -638,10 +641,10 @@ msgid "Press any button on the Wii U Pro Controller now. Press Home to clear the
 msgstr "请按 Wii U 专业手柄上的任意键。 按【HOME键】可清除映射。"
 
 msgid "Press any button on the Wiimote now. Press Home to clear the existing mapping."
-msgstr "按下 Wii 右手柄任意键（按 HOME 键清空映射）"
+msgstr "请按 Wii 右手柄上的任意键。 按【HOME键】可清除映射。"
 
 msgid "Press any button on the Wiimote or Nunchuk now. Press Home to clear the existing mapping."
-msgstr "按下 Wii 左手柄或右手柄任意键（按 HOME 键清空映射）"
+msgstr "请按 Wii 左右手柄上的任意键。 按【HOME键】可清除映射。"
 
 msgid "Preview Image"
 msgstr "预览图片"
@@ -650,7 +653,7 @@ msgid "Preview Screenshot"
 msgstr "截屏"
 
 msgid "Progressive (480p)"
-msgstr "逐行扫描（480p）"
+msgstr "逐行扫描 (480p)"
 
 msgid "Progressive (576p)"
 msgstr "逐行扫描 (576p)"
@@ -868,7 +871,7 @@ msgstr "超任鼠标 - NGC 手柄"
 msgid "SNES Mouse - Wiimote"
 msgstr "超任鼠标 - Wii 右手柄"
 
-msgid "Snes9x - Copyright (c) Snes9x Team 1996 - 2025"
+msgid "Snes9x - Copyright (c) Snes9x Team 1996 - 2026"
 msgstr "Snes9x - 版权所有 (c) Snes9x 团队 1996 - 2026"
 
 msgid "Snes9x GX GameCube"
@@ -887,7 +890,7 @@ msgid "Spanish"
 msgstr "西班牙语"
 
 msgid "Sprites Per-Line Limit"
-msgstr "画面限制"
+msgstr "精灵限制"
 
 msgid "SRAM"
 msgstr "电池存档"
@@ -1055,7 +1058,7 @@ msgid "Wiimote Orientation"
 msgstr "菜单界面下的 Wii 右手柄"
 
 msgid "XBOX360: connected"
-msgstr "XBOX360：已连接"
+msgstr "XBOX360 手柄：已连接"
 
 msgid "Yes"
 msgstr "是"

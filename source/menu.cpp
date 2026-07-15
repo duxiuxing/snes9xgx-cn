@@ -167,6 +167,7 @@ void ChangeLanguage() {
 		return;
 	}
 
+#ifdef MULTI_LANGUAGES_SUPPORT
 	if(GCSettings.language == LANG_JAPANESE || GCSettings.language == LANG_KOREAN || GCSettings.language == LANG_SIMP_CHINESE) {
 #ifdef HW_RVL
 		char filepath[MAXPATHLEN];
@@ -209,6 +210,8 @@ void ChangeLanguage() {
 		}
 	}
 #endif
+#endif // #ifdef MULTI_LANGUAGES_SUPPORT
+
 	ResetText();
 	currentLanguage = GCSettings.language;
 }
@@ -941,7 +944,7 @@ static void WindowCredits(void * ptr)
 
 	GuiText::SetPresets(12, (GXColor){0, 0, 0, 255}, 0, FTGX_JUSTIFY_CENTER | FTGX_ALIGN_TOP, ALIGN_CENTRE, ALIGN_BOTTOM);
 
-	txt[i] = new GuiText("Snes9x - Copyright (c) Snes9x Team 1996 - 2023");
+	txt[i] = new GuiText("Snes9x - Copyright (c) Snes9x Team 1996 - 2026");
 	txt[i]->SetPosition(0,-44); i++;
 	txt[i] = new GuiText("This software is open source and may be copied, distributed, or modified ");
 	txt[i]->SetPosition(0,-32); i++;
@@ -2914,11 +2917,7 @@ ButtonMappingWindow()
 	switch(mapMenuCtrl)
 	{
 		case CTRLR_GCPAD:
-			#ifdef HW_RVL
-			sprintf(msg, "Press any button on the GameCube Controller now. Press Home or the C-Stick in any direction to clear the existing mapping.");
-			#else
 			sprintf(msg, "Press any button on the GameCube Controller now. Press the C-Stick in any direction to clear the existing mapping.");
-			#endif
 			break;
 		case CTRLR_WIIMOTE:
 			sprintf(msg, "Press any button on the Wiimote now. Press Home to clear the existing mapping.");
@@ -4575,12 +4574,14 @@ static int MenuSettingsMenu()
 				GCSettings.Rumble = !GCSettings.Rumble;
 				break;
 			case 5:
+#ifdef MULTI_LANGUAGES_SUPPORT
 				GCSettings.language++;
-				
+
 				if(GCSettings.language == LANG_TRAD_CHINESE) // skip (not supported)
 					GCSettings.language = LANG_KOREAN;
 				else if(GCSettings.language >= LANG_LENGTH)
 					GCSettings.language = LANG_JAPANESE;
+#endif
 				break;
 			case 6:
 				GCSettings.PreviewImage++;

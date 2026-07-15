@@ -391,7 +391,9 @@ decodePrefsData ()
 			loadXMLSetting(&GCSettings.MusicVolume, "MusicVolume");
 			loadXMLSetting(&GCSettings.SFXVolume, "SFXVolume");
 			loadXMLSetting(&GCSettings.Rumble, "Rumble");
+#ifdef MULTI_LANGUAGES_SUPPORT
 			loadXMLSetting(&GCSettings.language, "language");
+#endif
 			loadXMLSetting(&GCSettings.PreviewImage, "PreviewImage");
 			loadXMLSetting(&GCSettings.HideSRAMSaving, "HideSRAMSaving");
 
@@ -510,7 +512,8 @@ DefaultSettings ()
 	GCSettings.Rumble = true;
 	GCSettings.PreviewImage = PREVIEWIMAGE_COVER;
 	GCSettings.HideSRAMSaving = false;
-	
+
+#ifdef MULTI_LANGUAGES_SUPPORT
 #ifdef HW_RVL
 	GCSettings.language = CONF_GetLanguage();
 
@@ -519,6 +522,7 @@ DefaultSettings ()
 #else
 	GCSettings.language = SYS_GetLanguage() + LANG_ENGLISH;
 #endif
+#endif // #ifdef MULTI_LANGUAGES_SUPPORT
 
 	/****************** SNES9x Settings ***********************/
 
@@ -726,9 +730,9 @@ bool LoadPrefs()
 			break;
 	}
 
-	if(!prefFound) {
-		return false;
-	}
+//	if(!prefFound) {
+//		return false;
+//	}
 
 	FixInvalidSettings();
 
