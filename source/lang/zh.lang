@@ -214,9 +214,6 @@ msgstr "荷兰语"
 msgid "DVD"
 msgstr "DVD 光盘"
 
-msgid "eke-eke, others"
-msgstr "duxiuxing/snes9xgx-cn"
-
 msgid "Empty or invalid ZIP file!"
 msgstr "ZIP 文件为空或无效！"
 
@@ -263,7 +260,7 @@ msgid "Failed to connect to network share."
 msgstr "连接网络共享失败。"
 
 msgid "FCE Ultra GX GameCube"
-msgstr "GitHub 上的项目"
+msgstr "GameCube 上的版本"
 
 msgid "FDS BIOS file is invalid!"
 msgstr "FDS 的 BIOS 文件是无效的！"
@@ -875,13 +872,10 @@ msgid "Snes9x - Copyright (c) Snes9x Team 1996 - 2026"
 msgstr "Snes9x - 版权所有 (c) Snes9x 团队 1996 - 2026"
 
 msgid "Snes9x GX GameCube"
-msgstr "GitHub 上的项目"
+msgstr "GameCube 上的版本"
 
 msgid "Snes9x Team"
 msgstr "Snes9x 团队"
-
-msgid "SoftDev, crunchy2,"
-msgstr "dborth/snes9xgx"
 
 msgid "Sound Effects Volume"
 msgstr "效果音的音量"
